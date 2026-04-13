@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vertiv Predictive Maintenance Console</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+/* ===== BASE ===== */
+body {
+    margin:0;
+    font-family: "Segoe UI", system-ui;
+    background:#F6F7FB;
+    color:#1A1F2B;
+}
+
+/* ===== LAYOUT ===== */
+.app {
+    display:grid;
+    grid-template-columns:220px 1fr;
+    height:100vh;
+}
+
+/* ===== SIDEBAR ===== */
+.sidebar {
+    background:#FFFFFF;
+    border-right:1px solid #D7DCE3;
+    padding:16px;
+    font-size:13px;
+}
+
+.sidebar b { display:block; margin-bottom:16px; }
+
+/* ===== TOPBAR ===== */
+.topbar {
+    height:56px;
+    background:#FFFFFF;
+    border-bottom:1px solid #D7DCE3;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 16px;
+    font-size:13px;
+}
+
+/* ===== CONTENT ===== */
+.content {
+    padding:12px;
+    overflow:auto;
+}
+
+/* ===== GRID ===== */
+.grid { display:grid; gap:12px; }
+.grid-6 { grid-template-columns:repeat(6,1fr); }
+.grid-3 { grid-template-columns:repeat(3,1fr); }
+.grid-2 { grid-template-columns:2fr 1fr; }
+
+/* ===== CARD ===== */
+.card {
+    background:#FFFFFF;
+    border:1px solid #D7DCE3;
+    border-radius:8px;
+    padding:12px;
+}
+
+/* ===== KPI ===== */
+.kpi {
+    background:#F2F4F8;
+    padding:10px;
+    border-radius:6px;
+}
+.kpi-title { font-size:11px; color:#5A6474; }
+.kpi-val { font-size:18px; font-weight:600; }
+
+/* ===== TEXT ===== */
+.title { font-size:13px; font-weight:600; margin-bottom:6px; }
+.small { font-size:11px; color:#5A6474; }
+
+/* ===== STATUS ===== */
+.ok { color:#16A34A; }
+.warn { color:#F59E0B; }
+.crit { color:#DC2626; }
+
+/* ===== TABLE ===== */
+.row {
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+    padding:2px 0;
+}
+
+/* ===== TABS ===== */
+.tabs { display:flex; gap:16px; margin-top:8px; }
+.tab { cursor:pointer; padding-bottom:4px; }
+.active { border-bottom:2px solid #2563EB; font-weight:600; }
+
+.hidden { display:none; }
+
+/* ===== new added ===== */
+
+.chart-small {
+    height:130px;
+}
+.table {
+    font-size:11px;
+    max-height:140px;
+    overflow:auto;
+}
+.table-container {
+    border:1px solid #D7DCE3;
+    border-radius:6px;
+    overflow:hidden;
+    margin-top:12px;
+}
+
+.table-header {
+    background:#F2F4F8;
+    font-size:11px;
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    padding:6px;
+    font-weight:600;
+}
+
+.table-body {
+    max-height:180px;
+    overflow:auto;
+    font-size:11px;
+}
+
+.table-row {
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    padding:4px 6px;
+    border-bottom:1px solid #F0F2F5;
+}
+
+.table-row:nth-child(even) {
+    background:#FAFBFD;
+}
+
+.tabs-small {
+    display:flex;
+    gap:12px;
+    margin-bottom:6px;
+}
+
+.tab-small {
+    font-size:12px;
+    cursor:pointer;
+    padding-bottom:2px;
+}
+
+.active-small {
+    border-bottom:2px solid #2563EB;
+    font-weight:600;
+}
+
+.hidden { display:none; }
+
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<b>Vertiv PM</b>
+<div>Dashboard</div>
+<div>Upload Visit</div>
+<div>Report</div>
+<div>Settings</div>
+</div>
+
+<!-- MAIN -->
+<div>
+
+<div class="topbar">
+<div>⚡ HiPulse V UPS | Asset: UPS-01</div>
+<div>DQ: 92 | Duration: 2.3h | Rows: 52k</div>
+</div>
+
+<div class="content">
+
+<!-- KPI STRIP -->
+<div class="grid grid-6">
+<div class="kpi"><div class="kpi-title">Overall HI</div><div class="kpi-val warn">74</div></div>
+<div class="kpi"><div class="kpi-title">Alarm Rate</div><div class="kpi-val crit">59/h</div></div>
+<div class="kpi"><div class="kpi-title">Total Alarms</div><div class="kpi-val">137</div></div>
+<div class="kpi"><div class="kpi-title">Alarm Storms</div><div class="kpi-val warn">4</div></div>
+<div class="kpi"><div class="kpi-title">Vdc Std</div><div class="kpi-val warn">6.5V</div></div>
+<div class="kpi"><div class="kpi-title">Freq Err</div><div class="kpi-val crit">0.45Hz</div></div>
+</div>
+
+<!-- HEALTH + RISK -->
+<div class="grid grid-2">
+
+<div class="card">
+<div class="title">Subsystem Health</div>
+<div class="row">Rectifier <span class="warn">68</span></div>
+<div class="row">Inverter <span class="ok">82</span></div>
+<div class="row">Battery <span class="warn">65</span></div>
+<div class="row">Grid/Bypass <span class="warn">70</span></div>
+<div class="row">Switchgear <span class="ok">79</span></div>
+</div>
+
+<div class="card">
+<div class="title">Risk Forecast</div>
+<div class="row">Inverter Fail <span class="crit">62%</span></div>
+<div class="row">Rectifier Fail <span class="warn">48%</span></div>
+<div class="row">Dsat Risk <span class="crit">55%</span></div>
+<div class="row">No Sync <span class="warn">38%</span></div>
+</div>
+
+</div>
+
+<!-- RCA + AI -->
+<div class="grid grid-2">
+
+<div class="card">
+<div class="title">Root Cause Analysis</div>
+<div class="small">Rectifier/DC instability (58%)</div>
+<div class="small">→ High ripple observed</div>
+<div class="small">→ Vdc drop events</div>
+
+<br>
+
+<div class="small">Grid frequency disturbance (26%)</div>
+<div class="small">→ Sync error 0.45Hz</div>
+</div>
+
+<div class="card">
+<div class="title">AI Insight Engine</div>
+<div class="small">
+System degraded due to DC link instability and battery degradation under repeated overload conditions.
+</div>
+
+<br>
+
+<div class="small">Action:</div>
+<div class="small">• Inspect DC capacitors</div>
+<div class="small">• Check battery bank</div>
+<div class="small">• Verify grid stability</div>
+</div>
+
+<!-- </div> -->
+
+<!-- CHARTS -->
+<!-- <div class="grid grid-2">
+
+<div class="card">
+<div class="title">Electrical Trends</div>
+<canvas id="trend"></canvas>
+</div> -->
+
+    <div class="card">
+    <div class="title">Electrical Trends (Compact)</div>
+    <div class="chart-small">
+    <canvas id="trend"></canvas>
+    </div>
+    <div class="small">
+    Vdc Min: 395V | Drop Rate: 12V/s | Freq Drift: 0.45Hz
+    </div>
+    <div class="card">
+    <div class="title">Alarm Distribution</div>
+    <div class="chart-small">
+    <canvas id="alarm"></canvas>
+    </div>
+    </div>
+
+</div>
+
+<!-- ALARM INTELLIGENCE -->
+<div class="grid grid-2">
+
+<!-- RAW ALARMS -->
+<div class="card">
+<div class="title">Raw Alarm Log</div>
+<div class="table">
+<div>12:10 → Mains Freq Abnormal</div>
+<div>12:11 → Rectifier Fail</div>
+<div>12:12 → Vdc Drop</div>
+<div>12:13 → Dsat U Phase</div>
+<div>12:14 → Inverter Fail</div>
+</div>
+</div>
+
+<!-- SIGNAL SNAPSHOT -->
+<div class="card">
+<div class="title">Signal @ Alarm</div>
+<div class="table">
+<div>Rectifier Fail → Vdc: 398V | Freq: 49.3Hz</div>
+<div>Dsat → Vdc: 392V | Load: 82%</div>
+</div>
+</div>
+
+</div>
+
+<!-- SEQUENCE -->
+<div class="card">
+<div class="title">Alarm Sequences</div>
+<div>[6x] Freq → Rectifier → Vdc → Dsat</div>
+<div>[3x] Battery Dip → DC Collapse</div>
+</div>
+
+<!-- AI INTERPRETATION -->
+<div class="card">
+<div class="title">AI Alarm Intelligence</div>
+<div class="small">
+Primary root cause: Grid frequency instability causing rectifier shutdown.
+Secondary effects: DC link collapse → inverter stress → Dsat faults.
+Battery shows degradation but not root cause.
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+<div class="tab active" onclick="tab('site')">Site</div>
+<div class="tab" onclick="tab('rnd')">R&D</div>
+</div>
+
+<!-- SITE -->
+<div id="site">
+<div class="card">
+<div class="title">Executive Summary</div>
+<div class="small">
+UPS shows early degradation signs. Immediate attention required for battery and DC link.
+</div>
+</div>
+</div>
+
+<!-- RND -->
+<div id="rnd" class="hidden">
+<div class="card">
+<div class="title">Feature Drivers</div>
+<div class="small">VdcStd ↑ (6.5V)</div>
+<div class="small">Freq error ↑ (0.45Hz)</div>
+<div class="small">IbattComm error ↑</div>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+<div class="card">
+<div class="title">Raw Data Inspector</div>
+
+<div class="tabs-small">
+<div class="tab-small active-small" onclick="switchRaw('data')">Data Log</div>
+<div class="tab-small" onclick="switchRaw('alarm')">Alarm Log</div>
+</div>
+
+<!-- DATA LOG -->
+<div id="dataLog">
+
+<div class="table-container">
+
+<div class="table-header">
+<div>Time</div>
+<div>Vdc</div>
+<div>Vbatt</div>
+<div>Ibatt</div>
+<div>Freq</div>
+<div>Vout</div>
+<div>Iout</div>
+</div>
+
+<div class="table-body">
+
+<div class="table-row">
+<div>12:10:01</div><div>420</div><div>2.8</div><div>5.2</div><div>50</div><div>230</div><div>18</div>
+</div>
+
+<div class="table-row">
+<div>12:10:02</div><div class="warn">405</div><div>2.6</div><div>6.1</div><div class="crit">49.5</div><div>228</div><div>22</div>
+</div>
+
+<div class="table-row">
+<div>12:10:03</div><div class="crit">395</div><div class="warn">2.2</div><div>7.5</div><div>49.3</div><div>225</div><div>25</div>
+</div>
+
+</div>
+</div>
+</div>
+
+<!-- ALARM LOG -->
+<div id="alarmLog" class="hidden">
+
+<div class="table-container">
+
+<div class="table-header">
+<div>Time</div>
+<div>Alarm</div>
+<div>State</div>
+<div>Severity</div>
+<div></div><div></div><div></div>
+</div>
+
+<div class="table-body">
+
+<div class="table-row">
+<div>12:10:10</div><div>Freq Abnormal</div><div class="crit">ON</div><div class="crit">Critical</div>
+</div>
+
+<div class="table-row">
+<div>12:11:02</div><div>Rectifier Fail</div><div class="crit">ON</div><div class="crit">Critical</div>
+</div>
+
+<div class="table-row">
+<div>12:12:15</div><div>Vdc Drop</div><div class="warn">ON</div><div class="warn">Warning</div>
+</div>
+
+</div>
+</div>
+</div>
+
+</div>
+
+<script>
+
+function switchRaw(type){
+    document.getElementById("dataLog").classList.toggle("hidden", type!=="data");
+    document.getElementById("alarmLog").classList.toggle("hidden", type!=="alarm");
+
+    document.querySelectorAll(".tab-small").forEach(t=>t.classList.remove("active-small"));
+    event.target.classList.add("active-small");
+}
+
+</script>
+<script>
+
+function tab(name){
+document.getElementById("site").classList.toggle("hidden", name!=="site");
+document.getElementById("rnd").classList.toggle("hidden", name!=="rnd");
+}
+
+/* CHARTS */
+new Chart(trend,{
+type:"line",
+data:{
+labels:["10","11","12","13","14","15"],
+datasets:[
+{label:"Vdc",data:[420,415,400,410,405,395],borderColor:"#2563EB"},
+{label:"Freq",data:[50,49.8,49.5,49.7,49.6,49.4],borderColor:"#DC2626"}
+]
+}
+});
+
+new Chart(alarm,{
+type:"bar",
+data:{
+labels:["Rectifier","Dsat","Freq","Battery"],
+datasets:[{data:[32,25,18,12],backgroundColor:"#2563EB"}]
+}
+});
+
+</script>
+
+</body>
+</html>

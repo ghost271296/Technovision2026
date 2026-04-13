@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UPS Intelligent Diagnostic Console</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+/* ===== GLOBAL ===== */
+body {
+    margin:0;
+    font-family: "Segoe UI", "Inter", sans-serif;
+    background: radial-gradient(circle at top, #0F172A, #020617);
+    color:#E5E7EB;
+    font-size:13px;
+}
+
+/* ===== HEADER ===== */
+.header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:12px 18px;
+    background:linear-gradient(90deg,#020617,#0F172A);
+    border-bottom:1px solid #1E293B;
+}
+
+.header b {
+    font-size:14px;
+    letter-spacing:0.5px;
+}
+
+/* ===== COLORS ===== */
+.green{color:#22C55E;}
+.yellow{color:#EAB308;}
+.red{color:#EF4444;}
+.blue{color:#38BDF8;}
+
+/* ===== KPI ===== */
+.kpi {
+    display:grid;
+    grid-template-columns: repeat(5,1fr);
+    gap:10px;
+    padding:10px;
+}
+
+.kpi-card {
+    background:linear-gradient(145deg,#0F172A,#020617);
+    border:1px solid #1E293B;
+    padding:12px;
+    border-radius:6px;
+    transition:0.2s;
+}
+
+.kpi-card:hover {
+    border-color:#38BDF8;
+    box-shadow:0 0 10px rgba(56,189,248,0.2);
+}
+
+.kpi-title {
+    font-size:10px;
+    color:#64748B;
+    text-transform:uppercase;
+    letter-spacing:1px;
+}
+
+.kpi-value {
+    font-size:18px;
+    font-weight:700;
+}
+
+/* ===== GRID ===== */
+.grid {
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:10px;
+    padding:10px;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background:linear-gradient(145deg,#0F172A,#020617);
+    border:1px solid #1E293B;
+    border-radius:6px;
+    padding:12px;
+    transition:0.2s;
+}
+
+.card:hover {
+    border-color:#38BDF8;
+    box-shadow:0 0 8px rgba(56,189,248,0.15);
+}
+
+/* ===== TITLES ===== */
+.title {
+    font-size:11px;
+    color:#38BDF8;
+    margin-bottom:8px;
+    font-weight:600;
+    text-transform:uppercase;
+}
+
+/* ===== ROW ===== */
+.row {
+    display:flex;
+    justify-content:space-between;
+    padding:3px 0;
+    border-bottom:1px solid rgba(30,41,59,0.5);
+}
+
+/* ===== REPORT CARD ===== */
+.report-card {
+    grid-column: span 3;
+    border-left:4px solid #38BDF8;
+}
+
+.report-title {
+    font-size:13px;
+    font-weight:700;
+    margin-bottom:6px;
+}
+
+.report-section {
+    margin-top:6px;
+    font-size:12px;
+}
+
+/* ===== BOTTOM ===== */
+.bottom {
+    display:grid;
+    grid-template-columns: 2fr 1fr;
+    gap:10px;
+    padding:10px;
+}
+
+/* ===== TABLE ===== */
+.table {
+    font-size:12px;
+}
+
+.table-row {
+    display:grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    padding:5px 0;
+    border-bottom:1px solid rgba(30,41,59,0.4);
+}
+
+.table-row:hover {
+    background:rgba(56,189,248,0.05);
+}
+
+/* ===== SCROLL ===== */
+::-webkit-scrollbar {
+    width:6px;
+}
+::-webkit-scrollbar-thumb {
+    background:#1E293B;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div><b>UPS-01 | 10kVA</b></div>
+    <div>
+        Mode <span class="green">Online</span> |
+        Load <span class="yellow">65%</span> |
+        Health <span class="green">82%</span> |
+        Risk <span class="yellow">Medium</span>
+    </div>
+</div>
+
+<!-- KPI -->
+<div class="kpi">
+    <div class="kpi-card"><div class="kpi-title">Battery</div><div class="kpi-value yellow">2.3 hrs</div></div>
+    <div class="kpi-card"><div class="kpi-title">Efficiency</div><div class="kpi-value green">94.2%</div></div>
+    <div class="kpi-card"><div class="kpi-title">Temp</div><div class="kpi-value red">52°C</div></div>
+    <div class="kpi-card"><div class="kpi-title">Ripple</div><div class="kpi-value yellow">0.32</div></div>
+    <div class="kpi-card"><div class="kpi-title">Events</div><div class="kpi-value">13</div></div>
+</div>
+
+<!-- CORE -->
+<div class="grid">
+
+<div class="card">
+    <div class="title">Electrical Snapshot</div>
+    <div class="row"><span>Input</span><span>415V</span></div>
+    <div class="row"><span>Output</span><span>230V</span></div>
+    <div class="row"><span>DC Bus</span><span>720V</span></div>
+</div>
+
+<div class="card">
+    <div class="title">Subsystem Health</div>
+    <div class="row"><span>Battery</span><span class="yellow">72%</span></div>
+    <div class="row"><span>Capacitor</span><span class="yellow">65%</span></div>
+    <div class="row"><span>IGBT</span><span class="green">88%</span></div>
+</div>
+
+<div class="card">
+    <div class="title">Alarm Analysis</div>
+    <div class="row"><span>Thermal</span><span>8</span></div>
+    <div class="row"><span>Overload</span><span>5</span></div>
+</div>
+
+<!-- AI REPORT CARD -->
+<div class="card report-card">
+    <div class="report-title blue">AI Insight Engine — UPS Report Card</div>
+
+    <div class="report-section">
+        <b>Status:</b> System operating normally but showing <span class="yellow">battery degradation</span>.
+    </div>
+
+    <div class="report-section">
+        <b>Key Observations:</b>
+        <ul>
+            <li>Repeated thermal stress under high load</li>
+            <li>Capacitor ripple increasing gradually</li>
+            <li>Battery voltage drop observed during peak load</li>
+        </ul>
+    </div>
+
+    <div class="report-section">
+        <b>Prediction:</b>
+        Battery likely to degrade significantly within <span class="red">2–4 weeks</span>.
+    </div>
+
+    <div class="report-section">
+        <b>Recommended Actions:</b>
+        <ul>
+            <li>Inspect battery bank</li>
+            <li>Check cooling system airflow</li>
+            <li>Evaluate DC link capacitors</li>
+        </ul>
+    </div>
+
+</div>
+
+</div>
+
+<!-- ANALYTICS -->
+<div class="bottom">
+
+<div class="card">
+    <div class="title">Trend Visualization</div>
+    <canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+    <div class="title">Predictive Maintenance</div>
+    <div>Fault Detection: <span class="red">Active</span></div>
+    <div>Remaining Life: <span class="yellow">~2.3 hrs</span></div>
+    <div>Expected Outcome:</div>
+    <div class="green">Reduced downtime</div>
+</div>
+
+</div>
+
+<!-- EVENTS -->
+<div class="card" style="margin:10px;">
+    <div class="title">Event Log</div>
+
+    <div class="table">
+        <div class="table-row"><span>12:10</span><span>Overload</span><span class="yellow">Warning</span></div>
+        <div class="table-row"><span>12:12</span><span>Temp Rise</span><span class="red">Critical</span></div>
+        <div class="table-row"><span>14:05</span><span>Battery Dip</span><span class="yellow">Warning</span></div>
+    </div>
+
+</div>
+
+<script>
+new Chart(document.getElementById("chart"), {
+    type:"line",
+    data:{
+        labels:["10","11","12","13","14","15"],
+        datasets:[
+            {label:"DC Bus",data:[710,715,690,700,705,720],borderColor:"#22C55E"},
+            {label:"Temp",data:[40,42,48,50,47,45],borderColor:"#EF4444"}
+        ]
+    }
+});
+</script>
+
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>UPS Industrial Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    margin:0;
+    font-family: "Segoe UI", sans-serif;
+    background:#0A0F1C;
+    color:#D1D5DB;
+}
+
+/* HEADER */
+.header {
+    display:flex;
+    justify-content:space-between;
+    padding:10px 16px;
+    background:#0F172A;
+    border-bottom:1px solid #1E293B;
+    font-size:16px;
+}
+
+/* KPI CARDS */
+.kpi {
+    display:grid;
+    grid-template-columns: repeat(5,1fr);
+    gap:6px;
+    padding:8px;
+}
+
+.kpi-card {
+    background:#0F172A;
+    border:1px solid #1E293B;
+    padding:8px;
+    border-radius:6px;
+}
+
+.kpi-title {
+    font-size:16px;
+    color:#6B7280;
+}
+
+.kpi-value {
+    font-size:16px;
+    font-weight:bold;
+}
+
+/* COLORS */
+.green{color:#22C55E;}
+.yellow{color:#EAB308;}
+.red{color:#EF4444;}
+
+/* GRID */
+.grid {
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:8px;
+    padding:8px;
+}
+
+.card {
+    background:#0F172A;
+    border:1px solid #1E293B;
+    padding:10px;
+    border-radius:6px;
+}
+
+.title {
+    font-size:16px;
+    color:#60A5FA;
+    margin-bottom:6px;
+    font-weight:600;
+}
+
+.row {
+    display:flex;
+    justify-content:space-between;
+    font-size:12px;
+}
+
+/* BOTTOM */
+.bottom {
+    display:grid;
+    grid-template-columns: 1.0fr 1fr;
+    gap:2px;
+    padding:2px;
+	font-size: 16px;
+}
+
+/* TABLE */
+.table {
+    width:100%;
+    font-size:16px;
+}
+
+.table-header, .table-row {
+    display:grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    padding:2px 0;
+}
+
+.table-header {
+    color:#6B7280;
+    border-bottom:1px solid #1E293B;
+}
+
+.table-row {
+    border-bottom:1px solid #111827;
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div><b>UPS-01 | 10kVA</b></div>
+    <div>
+        Mode: <span class="green">Online</span>
+        | Load: <span class="yellow">65%</span>
+        | Health: <span class="green">82%</span>
+        | Risk: <span class="yellow">Medium</span>
+    </div>
+</div>
+
+<!-- KPI CARDS -->
+<div class="kpi">
+    <div class="kpi-card">
+        <div class="kpi-title">Battery Life</div>
+        <div class="kpi-value yellow">2.3 hrs</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">Efficiency</div>
+        <div class="kpi-value green">94.2%</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">Temp Peak</div>
+        <div class="kpi-value red">52°C</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">Ripple Index</div>
+        <div class="kpi-value yellow">0.32</div>
+    </div>
+    <div class="kpi-card">
+        <div class="kpi-title">Events (24h)</div>
+        <div class="kpi-value">13</div>
+    </div>
+</div>
+
+<!-- TOP GRID -->
+<div class="grid">
+
+<div class="card">
+    <div class="title">Electrical</div>
+    <div class="row"><span>Input</span><span>415V</span></div>
+    <div class="row"><span>Output</span><span>230V</span></div>
+    <div class="row"><span>DC Bus</span><span>418V</span></div>
+</div>
+
+<div class="card">
+    <div class="title">Health</div>
+    <div class="row"><span>Battery</span><span class="yellow">72%</span></div>
+    <div class="row"><span>Capacitor</span><span class="yellow">65%</span></div>
+    <div class="row"><span>IGBT</span><span class="green">88%</span></div>
+</div>
+
+<div class="card">
+    <div class="title">Failure Risk</div>
+    <div class="row"><span>Battery</span><span class="yellow">38%</span></div>
+    <div class="row"><span>Thermal</span><span class="red">52%</span></div>
+</div>
+
+</div>
+
+<!-- ANALYTICS -->
+<div class="bottom">
+
+<div class="card">
+    <div class="title">System Trends</div>
+    <canvas id="chart"></canvas>
+</div>
+
+<div class="card">
+    <div class="title">Analytics</div>
+    <div class="row"><span>Thermal Stress</span><span class="red">HIGH</span></div>
+    <div class="row"><span>Efficiency</span><span class="green">94.2%</span></div>
+    <div class="row"><span>Ripple</span><span class="yellow">0.32</span></div>
+</div>
+
+</div>
+
+<!-- EVENT TABLE -->
+<div class="card" style="margin:8px;">
+    <div class="title">Event Log</div>
+
+    <div class="table">
+        <div class="table-header">
+            <span>Time</span><span>Event</span><span>Status</span>
+        </div>
+
+        <div class="table-row">
+            <span>12:10</span><span>Overload</span><span class="yellow">Warning</span>
+        </div>
+        <div class="table-row">
+            <span>12:12</span><span>Temp Rise</span><span class="red">Critical</span>
+        </div>
+        <div class="table-row">
+            <span>14:05</span><span>Battery Dip</span><span class="yellow">Warning</span>
+        </div>
+    </div>
+
+</div>
+
+<script>
+new Chart(document.getElementById("chart"), {
+    type:"line",
+    data:{
+        labels:["10","11","12","13","14","15"],
+        datasets:[
+            {
+                label:"DC Bus",
+                data:[710,715,690,700,705,720],
+                borderColor:"#22C55E",
+                borderWidth:2
+            },
+            {
+                label:"Temp",
+                data:[40,42,48,50,47,45],
+                borderColor:"#EF4444",
+                borderWidth:2
+            }
+        ]
+    },
+    options:{
+        plugins:{legend:{labels:{color:"#D1D5DB"}}},
+        scales:{
+            x:{ticks:{color:"#6B7280"}},
+            y:{ticks:{color:"#6B7280"}}
+        }
+    }
+});
+</script>
+
+</body>
+</html>

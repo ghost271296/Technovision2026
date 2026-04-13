@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UPS Diagnostic Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", sans-serif;
+    background-color: #0F172A;
+    color: #E2E8F0;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    background: #1E293B;
+    padding: 10px;
+    font-size: 13px;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 8px;
+}
+
+.card {
+    background: #1E293B;
+    padding: 10px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.title {
+    font-weight: bold;
+    margin-bottom: 6px;
+    color: #93C5FD;
+}
+
+.row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.green { color: #22C55E; }
+.yellow { color: #EAB308; }
+.red { color: #EF4444; }
+
+.small {
+    font-size: 11px;
+    color: #94A3B8;
+}
+
+.full {
+    grid-column: span 3;
+}
+
+.bottom-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 8px;
+    padding: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div>UPS-01 | 10kVA</div>
+    <div>Mode: <span class="green">Online</span></div>
+    <div>Load: <span class="yellow">65%</span></div>
+    <div>Health: <span class="green">82%</span></div>
+    <div>Failure Risk: <span class="yellow">Medium</span></div>
+</div>
+
+<!-- TOP GRID -->
+<div class="grid">
+
+<!-- Electrical -->
+<div class="card">
+    <div class="title">Electrical Snapshot</div>
+    <div class="row"><span>Input</span><span>415V</span></div>
+    <div class="row"><span>Output</span><span>230V</span></div>
+    <div class="row"><span>DC Bus</span><span>720V</span></div>
+    <div class="row"><span>Freq</span><span>50Hz</span></div>
+    <div class="row"><span>Load</span><span>65%</span></div>
+    <div class="row"><span>PF</span><span>0.92</span></div>
+</div>
+
+<!-- Health -->
+<div class="card">
+    <div class="title">Health Matrix</div>
+    <div class="row"><span>Battery</span><span class="yellow">72%</span></div>
+    <div class="row"><span>Capacitor</span><span class="yellow">65%</span></div>
+    <div class="row"><span>IGBT</span><span class="green">88%</span></div>
+    <div class="row"><span>Thermal</span><span class="yellow">70%</span></div>
+</div>
+
+<!-- Failure -->
+<div class="card">
+    <div class="title">Failure Probability</div>
+    <div>Battery: <span class="yellow">38%</span></div>
+    <div>Thermal: <span class="red">52%</span></div>
+    <div>Capacitor: <span class="yellow">41%</span></div>
+    <div class="small">Based on last 48h trends</div>
+</div>
+
+<!-- Correlation -->
+<div class="card">
+    <div class="title">Event Correlation</div>
+    <div>Overload → Temp Rise → Warning</div>
+    <div>Low Battery → DC Dip → Alarm</div>
+    <div class="small">Pattern detected 6 times</div>
+</div>
+
+<!-- AI -->
+<div class="card">
+    <div class="title">AI Insights</div>
+    <div class="yellow">Battery degradation increasing</div>
+    <div class="red">Thermal instability at high load</div>
+    <div class="yellow">Capacitor ripple rising</div>
+</div>
+
+<!-- Actions -->
+<div class="card">
+    <div class="title">Recommended Actions</div>
+    <div>🔧 Check cooling fans</div>
+    <div>🔋 Battery inspection (urgent)</div>
+    <div>⚡ Inspect DC capacitors</div>
+</div>
+
+<!-- Trend Summary -->
+<div class="card full">
+    <div class="title">Trend Summary (Last 24h)</div>
+    <div class="row"><span>Max Temp</span><span>52°C</span></div>
+    <div class="row"><span>Min Battery</span><span>210V</span></div>
+    <div class="row"><span>Overload Events</span><span>5</span></div>
+    <div class="row"><span>Thermal Warnings</span><span>8</span></div>
+</div>
+
+</div>
+
+<!-- BOTTOM ANALYTICS -->
+<div class="bottom-grid">
+
+<!-- Chart -->
+<div class="card">
+    <div class="title">System Trends</div>
+    <canvas id="chart"></canvas>
+</div>
+
+<!-- Stress -->
+<div class="card">
+    <div class="title">Stress Indicators</div>
+    <div>Thermal Stress: <span class="red">High</span></div>
+    <div>Electrical Stress: <span class="yellow">Moderate</span></div>
+    <div>Switching Stress: <span class="green">Normal</span></div>
+    <hr>
+    <div class="small">Derived from load & temperature</div>
+</div>
+
+</div>
+
+<!-- Timeline -->
+<div class="card" style="margin:8px;">
+    <div class="title">Event Timeline</div>
+    <div>12:10 → Overload</div>
+    <div>12:12 → Temp Rise</div>
+    <div>12:15 → Thermal Warning</div>
+    <div>14:05 → Battery Dip</div>
+    <div>14:07 → Low Voltage Alarm</div>
+</div>
+
+<script>
+new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: {
+        labels: ["10:00","11:00","12:00","13:00","14:00","15:00"],
+        datasets: [
+            {
+                label: "DC Bus",
+                data: [710,715,690,700,705,720],
+                borderColor: "#22C55E"
+            },
+            {
+                label: "Temp",
+                data: [40,42,48,50,47,45],
+                borderColor: "#EF4444"
+            },
+            {
+                label: "Load %",
+                data: [50,55,80,75,65,60],
+                borderColor: "#EAB308"
+            }
+        ]
+    },
+    options: {
+        plugins: { legend: { labels: { color:"#E2E8F0" } } },
+        scales: {
+            x: { ticks: { color:"#94A3B8" } },
+            y: { ticks: { color:"#94A3B8" } }
+        }
+    }
+});
+</script>
+
+</body>
+</html>

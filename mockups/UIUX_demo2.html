@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+body { background:#0F172A; color:#E2E8F0; font-family:Segoe UI; margin:0; }
+
+.header {
+    display:flex; justify-content:space-between;
+    background:#1E293B; padding:10px; font-size:13px;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-auto-rows: minmax(120px, auto);
+    gap:8px;
+    padding:8px;
+}
+
+.card {
+    background:#1E293B;
+    padding:10px;
+    border-radius:6px;
+    font-size:12px;
+}
+
+.title { font-weight:bold; margin-bottom:6px; color:#93C5FD; }
+
+.small { font-size:11px; color:#94A3B8; }
+
+.green { color:#22C55E; }
+.yellow { color:#EAB308; }
+.red { color:#EF4444; }
+
+.row { display:flex; justify-content:space-between; }
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+    <div>UPS-01 | 10kVA</div>
+    <div>Mode: <span class="green">Online</span></div>
+    <div>Load: <span class="yellow">65%</span></div>
+    <div>Health: <span class="green">82%</span></div>
+    <div>Failure Risk: <span class="yellow">Medium</span></div>
+</div>
+
+<div class="grid">
+
+<!-- PARAMETERS -->
+<div class="card">
+    <div class="title">Electrical Snapshot</div>
+    <div class="row"><span>Input</span><span>415V</span></div>
+    <div class="row"><span>Output</span><span>230V</span></div>
+    <div class="row"><span>DC Bus</span><span>720V</span></div>
+    <div class="row"><span>Freq</span><span>50Hz</span></div>
+    <div class="row"><span>Load</span><span>65%</span></div>
+    <div class="row"><span>PF</span><span>0.92</span></div>
+</div>
+
+<!-- HEALTH MATRIX -->
+<div class="card">
+    <div class="title">Health Matrix</div>
+    <div class="row"><span>Battery</span><span class="yellow">72%</span></div>
+    <div class="row"><span>Capacitor</span><span class="yellow">65%</span></div>
+    <div class="row"><span>IGBT</span><span class="green">88%</span></div>
+    <div class="row"><span>Thermal</span><span class="yellow">70%</span></div>
+</div>
+
+<!-- FAILURE PROBABILITY -->
+<div class="card">
+    <div class="title">Failure Probability</div>
+    <div>Battery Failure: <span class="yellow">38%</span></div>
+    <div>Thermal Trip Risk: <span class="red">52%</span></div>
+    <div>Capacitor Failure: <span class="yellow">41%</span></div>
+    <div class="small">Based on last 48h trends</div>
+</div>
+
+<!-- EVENT CORRELATION -->
+<div class="card">
+    <div class="title">Event Correlation</div>
+    <div>Overload → Temp Rise → Warning</div>
+    <div>Low Battery → DC Dip → Alarm</div>
+    <div class="small">Pattern detected 6 times</div>
+</div>
+
+<!-- AI INSIGHTS -->
+<div class="card">
+    <div class="title">AI Insights</div>
+    <div class="yellow">Battery degradation trend increasing</div>
+    <div class="red">Thermal instability under high load</div>
+    <div class="yellow">Capacitor ripple rising</div>
+</div>
+
+<!-- MAINTENANCE -->
+<div class="card">
+    <div class="title">Recommended Actions</div>
+    <div>🔧 Check cooling fans</div>
+    <div>🔋 Battery inspection (urgent)</div>
+    <div>⚡ Inspect DC capacitors</div>
+</div>
+
+<!-- TREND NUMERIC -->
+<div class="card" style="grid-column: span 3;">
+    <div class="title">Trend Summary (Last 24h)</div>
+    <div class="row"><span>Max Temp</span><span>52°C</span></div>
+    <div class="row"><span>Min Battery</span><span>210V</span></div>
+    <div class="row"><span>Overload Events</span><span>5</span></div>
+    <div class="row"><span>Thermal Warnings</span><span>8</span></div>
+</div>
+
+</div>
+
+</body>
+</html>

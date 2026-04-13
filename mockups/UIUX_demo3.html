@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>UPS Diagnostic Dashboard - Industrial</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+/* ===== GLOBAL ===== */
+body {
+    margin: 0;
+    font-family: "Segoe UI", "Roboto", sans-serif;
+    background: #0B1220;
+    color: #D1D5DB;
+}
+
+/* ===== HEADER ===== */
+.header {
+    display: flex;
+    justify-content: space-between;
+    background: #111827;
+    padding: 8px 12px;
+    font-size: 12px;
+    border-bottom: 1px solid #1F2937;
+}
+
+.header span {
+    margin-left: 15px;
+}
+
+.green { color: #22C55E; }
+.yellow { color: #EAB308; }
+.red { color: #EF4444; }
+.blue { color: #38BDF8; }
+
+/* ===== GRID ===== */
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 6px;
+    padding: 6px;
+}
+
+/* ===== CARDS ===== */
+.card {
+    background: #111827;
+    border: 1px solid #1F2937;
+    border-radius: 4px;
+    padding: 8px;
+    font-size: 11px;
+}
+
+.title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #60A5FA;
+    margin-bottom: 6px;
+}
+
+/* ===== ROWS ===== */
+.row {
+    display: flex;
+    justify-content: space-between;
+    padding: 1px 0;
+}
+
+/* ===== METRICS ===== */
+.metric-big {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.subtle {
+    font-size: 10px;
+    color: #6B7280;
+}
+
+/* ===== BOTTOM GRID ===== */
+.bottom {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 6px;
+    padding: 6px;
+}
+
+/* ===== SMALL DIVIDER ===== */
+hr {
+    border: none;
+    border-top: 1px solid #1F2937;
+    margin: 6px 0;
+}
+</style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <div>UPS-01 | 10kVA</div>
+    <div>
+        Mode: <span class="green">Online</span>
+        <span>Load: <span class="yellow">65%</span></span>
+        <span>Health: <span class="green">82%</span></span>
+        <span>Risk: <span class="yellow">Medium</span></span>
+    </div>
+</div>
+
+<!-- TOP GRID -->
+<div class="grid">
+
+<!-- Electrical -->
+<div class="card">
+    <div class="title">Electrical</div>
+    <div class="row"><span>Input</span><span>415V</span></div>
+    <div class="row"><span>Output</span><span>230V</span></div>
+    <div class="row"><span>DC Bus</span><span>720V</span></div>
+    <div class="row"><span>Freq</span><span>50Hz</span></div>
+    <div class="row"><span>Load</span><span>65%</span></div>
+    <div class="row"><span>PF</span><span>0.92</span></div>
+</div>
+
+<!-- Health -->
+<div class="card">
+    <div class="title">Health Matrix</div>
+    <div class="row"><span>Battery</span><span class="yellow">72%</span></div>
+    <div class="row"><span>Capacitor</span><span class="yellow">65%</span></div>
+    <div class="row"><span>IGBT</span><span class="green">88%</span></div>
+    <div class="row"><span>Thermal</span><span class="yellow">70%</span></div>
+</div>
+
+<!-- Failure -->
+<div class="card">
+    <div class="title">Failure Probability</div>
+    <div class="row"><span>Battery</span><span class="yellow">38%</span></div>
+    <div class="row"><span>Thermal</span><span class="red">52%</span></div>
+    <div class="row"><span>Capacitor</span><span class="yellow">41%</span></div>
+    <div class="subtle">48h trend based</div>
+</div>
+
+<!-- Correlation -->
+<div class="card">
+    <div class="title">Event Correlation</div>
+    <div>Overload → Temp Rise → Warning</div>
+    <div>Battery Dip → DC Drop → Alarm</div>
+    <div class="subtle">Pattern ×6</div>
+</div>
+
+<!-- AI -->
+<div class="card">
+    <div class="title">AI Insights</div>
+    <div class="yellow">Battery degradation rising</div>
+    <div class="red">Thermal instability @ high load</div>
+    <div class="yellow">Capacitor ripple increasing</div>
+</div>
+
+<!-- Actions -->
+<div class="card">
+    <div class="title">Actions</div>
+    <div>🔧 Cooling system check</div>
+    <div>🔋 Battery inspection</div>
+    <div>⚡ DC capacitor review</div>
+</div>
+
+</div>
+
+<!-- ANALYTICS -->
+<div class="bottom">
+
+<!-- CHART -->
+<div class="card">
+    <div class="title">System Trends</div>
+    <canvas id="chart" height="80"></canvas>
+
+    <div class="row"><span>DC Avg</span><span class="green">705V</span></div>
+    <div class="row"><span>Temp Max</span><span class="red">52°C</span></div>
+    <div class="row"><span>Load Peak</span><span class="yellow">80%</span></div>
+</div>
+
+<!-- ANALYTICS PANEL -->
+<div class="card">
+    <div class="title">Analytics</div>
+
+    <div class="metric-big red">Thermal Stress: HIGH</div>
+    <div class="row"><span>Electrical</span><span class="yellow">Moderate</span></div>
+    <div class="row"><span>Switching</span><span class="green">Normal</span></div>
+
+    <hr>
+
+    <div class="title">Efficiency</div>
+    <div class="row"><span>Efficiency</span><span class="green">94.2%</span></div>
+    <div class="row"><span>Loss</span><span class="red">5.8%</span></div>
+
+    <hr>
+
+    <div class="title">Derived</div>
+    <div class="row"><span>Ripple Index</span><span class="yellow">0.32</span></div>
+    <div class="row"><span>Thermal Gradient</span><span class="red">High</span></div>
+</div>
+
+</div>
+
+<!-- TIMELINE -->
+<div class="card" style="margin:6px;">
+    <div class="title">Event Timeline</div>
+    <div class="row"><span>Overload</span><span>5</span></div>
+    <div class="row"><span>Thermal Warn</span><span>8</span></div>
+    <div class="row"><span>Battery Dip</span><span>3</span></div>
+
+    <hr>
+
+    <div class="subtle">12:10 → Overload → Temp Rise</div>
+    <div class="subtle">14:05 → Battery Dip → Alarm</div>
+</div>
+
+<!-- CHART SCRIPT -->
+<script>
+new Chart(document.getElementById("chart"), {
+    type: "line",
+    data: {
+        labels: ["10","11","12","13","14","15"],
+        datasets: [
+            {
+                label: "DC Bus",
+                data: [710,715,690,700,705,720],
+                borderColor: "#22C55E",
+                tension: 0.3
+            },
+            {
+                label: "Temp",
+                data: [40,42,48,50,47,45],
+                borderColor: "#EF4444",
+                tension: 0.3
+            },
+            {
+                label: "Load",
+                data: [50,55,80,75,65,60],
+                borderColor: "#EAB308",
+                tension: 0.3
+            }
+        ]
+    },
+    options: {
+        plugins: {
+            legend: { labels: { color: "#D1D5DB" } }
+        },
+        scales: {
+            x: { ticks: { color: "#6B7280" } },
+            y: { ticks: { color: "#6B7280" } }
+        }
+    }
+});
+</script>
+
+</body>
+</html>
