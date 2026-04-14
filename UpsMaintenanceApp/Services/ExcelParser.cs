@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using ClosedXML.Excel;
 using UpsMaintenanceApp.Models;
 
@@ -135,7 +136,7 @@ namespace UpsMaintenanceApp.Services
             if (!h.TryGetValue(key, out int col)) return 0.0;
             var cell = sheet.Cell(row, col);
             if (cell.IsEmpty()) return 0.0;
-            return double.TryParse(cell.GetString(), out double v) ? v : 0.0;
+            return double.TryParse(cell.GetString(), NumberStyles.Any,CultureInfo.InvariantCulture, out double v) ? v : 0.0;
         }
 
         private static DateTime GetDateTime(IXLWorksheet sheet, int row, Dictionary<string, int> h, string key)
@@ -144,7 +145,7 @@ namespace UpsMaintenanceApp.Services
             var cell = sheet.Cell(row, col);
             if (cell.IsEmpty()) return DateTime.MinValue;
             try   { return cell.GetDateTime(); }
-            catch { return DateTime.TryParse(cell.GetString(), out DateTime dt) ? dt : DateTime.MinValue; }
+            catch { return DateTime.TryParse(cell.GetString(), CultureInfo.InvariantCulture,DateTimeStyles.None, out DateTime dt) ? dt : DateTime.MinValue; }
         }
     }
 }

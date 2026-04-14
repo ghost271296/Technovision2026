@@ -45,6 +45,8 @@ namespace UpsMaintenanceApp.Services
                         options,
                         cts.Token);
  
+                    if (result.Content.Count == 0)
+                        throw new InvalidOperationException("OpenAI returned an empty response.");
                     return result.Content[0].Text;
                 }
                 catch (OperationCanceledException ex) when (cts.IsCancellationRequested)
@@ -54,8 +56,13 @@ namespace UpsMaintenanceApp.Services
                 }
                 catch (Exception ex)
                 {
+                    string msg = ex.Message;
+                    if (msg.Contains("401") || msg.Contains("403") || msg.Contains("400"))
+                        throw;
                     lastEx = ex;
                 }
+
+
  
                 attempt++;
  
