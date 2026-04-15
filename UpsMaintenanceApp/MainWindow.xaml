@@ -16,10 +16,10 @@
         <Border Background="White" BorderThickness="0,0,1,0" BorderBrush="#D7DCE3">
             <StackPanel Margin="16">
                 <TextBlock Text="Vertiv PM" FontSize="15" FontWeight="Bold" Margin="0,0,0,20"/>
-                <TextBlock Text="📊  Dashboard"   Style="{StaticResource NavItem}" Foreground="#2563EB" FontWeight="SemiBold"/>
-                <TextBlock Text="📁  Upload Visit" Style="{StaticResource NavItem}"/>
-                <TextBlock Text="📄  Report"       Style="{StaticResource NavItem}"/>
-                <TextBlock Text="⚙   Settings"     Style="{StaticResource NavItem}"/>
+                <Button x:Name="NavDashboard" Content="📊  Dashboard"    Tag="Dashboard" Click="Nav_Click" Style="{StaticResource NavButton}" Foreground="#2563EB" FontWeight="SemiBold"/>
+                <Button x:Name="NavUpload"    Content="📁  Upload Visit"  Tag="Upload"    Click="Nav_Click" Style="{StaticResource NavButton}"/>
+                <Button x:Name="NavReport"    Content="📄  Report"        Tag="Report"    Click="Nav_Click" Style="{StaticResource NavButton}"/>
+                <Button x:Name="NavSettings"  Content="⚙   Settings"      Tag="Settings"  Click="Nav_Click" Style="{StaticResource NavButton}"/>
                 <Separator Margin="0,16"/>
                 <Button x:Name="BtnLoadFile" Content="📂  Load DataLog"
                         Click="BtnLoadFile_Click"
@@ -107,7 +107,13 @@
                             </StackPanel>
                         </Border>
                     </UniformGrid>
+                    <views:UploadVisitPage x:Name="PageUpload"    Visibility="Collapsed"/>
 
+                    <!-- Report -->
+                    <views:ReportPage      x:Name="PageReport"    Visibility="Collapsed"/>
+
+                    <!-- Settings -->
+                    <views:SettingsPage    x:Name="PageSettings"  Visibility="Collapsed"/>
                     <!-- ── ALERT BANNER ── -->
                     <Border Background="White" BorderBrush="#D7DCE3" BorderThickness="1"
                             CornerRadius="8" Margin="0,0,0,10">

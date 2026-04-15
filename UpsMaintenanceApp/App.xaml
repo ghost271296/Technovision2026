@@ -3,15 +3,99 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <ResourceDictionary>
-            <SolidColorBrush x:Key="BackgroundDark"  Color="#0F172A"/>
-            <SolidColorBrush x:Key="BackgroundPanel" Color="#1E293B"/>
-            <SolidColorBrush x:Key="AccentBlue"      Color="#3B82F6"/>
-            <SolidColorBrush x:Key="AccentGreen"     Color="#22C55E"/>
-            <SolidColorBrush x:Key="AccentYellow"    Color="#EAB308"/>
-            <SolidColorBrush x:Key="AccentRed"       Color="#EF4444"/>
-            <SolidColorBrush x:Key="TextPrimary"     Color="#F1F5F9"/>
-            <SolidColorBrush x:Key="TextSecondary"   Color="#94A3B8"/>
-        </ResourceDictionary>
+
+        <BooleanToVisibilityConverter x:Key="BoolToVisibility"/>
+
+        <!-- Brushes -->
+        <SolidColorBrush x:Key="PageBg"        Color="#F6F7FB"/>
+        <SolidColorBrush x:Key="OkBrush"        Color="#16A34A"/>
+        <SolidColorBrush x:Key="WarnBrush"      Color="#F59E0B"/>
+        <SolidColorBrush x:Key="CritBrush"      Color="#DC2626"/>
+        <SolidColorBrush x:Key="AccentBrush"    Color="#2563EB"/>
+
+        <!-- Default TextBlock -->
+        <Style TargetType="TextBlock">
+            <Setter Property="Foreground" Value="#1A1F2B"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+        </Style>
+
+        <!-- Card -->
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="Background"      Value="White"/>
+            <Setter Property="BorderBrush"     Value="#D7DCE3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius"    Value="8"/>
+            <Setter Property="Padding"         Value="12"/>
+            <Setter Property="Margin"          Value="0,0,0,10"/>
+        </Style>
+
+        <!-- KPI Box -->
+        <Style x:Key="KpiBox" TargetType="Border">
+            <Setter Property="Background"   Value="#F2F4F8"/>
+            <Setter Property="CornerRadius" Value="6"/>
+            <Setter Property="Padding"      Value="10"/>
+            <Setter Property="Margin"       Value="0,0,8,0"/>
+        </Style>
+
+        <!-- Section Title -->
+        <Style x:Key="SectionTitle" TargetType="TextBlock">
+            <Setter Property="FontSize"   Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="#1A1F2B"/>
+            <Setter Property="Margin"     Value="0,0,0,8"/>
+        </Style>
+
+        <!-- Small Label -->
+        <Style x:Key="SmallLabel" TargetType="TextBlock">
+            <Setter Property="FontSize"   Value="11"/>
+            <Setter Property="Foreground" Value="#5A6474"/>
+        </Style>
+
+        <!-- Sidebar Nav Item -->
+        <Style x:Key="NavItem" TargetType="TextBlock">
+            <Setter Property="FontSize"   Value="13"/>
+            <Setter Property="Margin"     Value="0,5"/>
+            <Setter Property="Cursor"     Value="Hand"/>
+            <Setter Property="Foreground" Value="#5A6474"/>
+        </Style>
+
+        <!-- Flat ProgressBar (respects Foreground color) -->
+        <Style x:Key="FlatBar" TargetType="ProgressBar">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ProgressBar">
+                        <Border Background="{TemplateBinding Background}"
+                                CornerRadius="3" Height="{TemplateBinding Height}">
+                            <Border x:Name="PART_Indicator"
+                                    HorizontalAlignment="Left"
+                                    Background="{TemplateBinding Foreground}"
+                                    CornerRadius="3"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Flat nav button (no chrome) -->
+        <Style x:Key="NavButton" TargetType="Button">
+            <Setter Property="Background"                Value="Transparent"/>
+            <Setter Property="BorderThickness"           Value="0"/>
+            <Setter Property="Cursor"                    Value="Hand"/>
+            <Setter Property="FontSize"                  Value="13"/>
+            <Setter Property="FontFamily"                Value="Segoe UI"/>
+            <Setter Property="Foreground"                Value="#5A6474"/>
+            <Setter Property="Padding"                   Value="0,6"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
     </Application.Resources>
 </Application>
