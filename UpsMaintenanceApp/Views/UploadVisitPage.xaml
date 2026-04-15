@@ -1,0 +1,112 @@
+<UserControl x:Class="UpsMaintenanceApp.Views.UploadVisitPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Background="#F6F7FB">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Background="White" BorderThickness="0,0,0,1" BorderBrush="#D7DCE3" Padding="24,16">
+            <StackPanel>
+                <TextBlock Text="Upload Visit" FontSize="20" FontWeight="SemiBold"/>
+                <TextBlock Text="Load UPS DataLog and AlarmLog Excel file for predictive analysis"
+                           FontSize="12" Foreground="#5A6474" Margin="0,4,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+            <StackPanel Margin="24" MaxWidth="780" HorizontalAlignment="Left">
+
+                <!-- Drop Zone -->
+                <Border x:Name="DropZone" Background="White" CornerRadius="12" Padding="48"
+                        BorderBrush="#D7DCE3" BorderThickness="2" Margin="0,0,0,16"
+                        AllowDrop="True" Drop="DropZone_Drop" DragOver="DropZone_DragOver">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="📂" FontSize="52" HorizontalAlignment="Center" Margin="0,0,0,12"/>
+                        <TextBlock Text="Drag &amp; drop your Excel file here"
+                                   FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center"/>
+                        <TextBlock Text="or" FontSize="12" Foreground="#5A6474"
+                                   HorizontalAlignment="Center" Margin="0,8"/>
+                        <Button x:Name="BtnBrowse" Content="Browse Files" Click="BtnBrowse_Click"
+                                Padding="20,9" Background="#2563EB" Foreground="White"
+                                BorderBrush="Transparent" HorizontalAlignment="Center"
+                                FontWeight="SemiBold"/>
+                        <TextBlock Text="Supports .xlsx  |  Requires FullDataLog + AlarmLog sheets"
+                                   FontSize="11" Foreground="#94A3B8"
+                                   HorizontalAlignment="Center" Margin="0,14,0,0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Selected File -->
+                <Border x:Name="FileInfoPanel" Style="{StaticResource Card}" Visibility="Collapsed">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="📄" FontSize="30" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock x:Name="TxtFileName" FontSize="14" FontWeight="SemiBold"/>
+                            <TextBlock x:Name="TxtFileInfo" FontSize="11" Foreground="#5A6474" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <Button Grid.Column="2" Content="✕" Click="BtnRemoveFile_Click"
+                                Background="Transparent" Foreground="#94A3B8"
+                                BorderBrush="Transparent" FontSize="16" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- Analysis Options -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Style="{StaticResource SectionTitle}" Text="Analysis Configuration"/>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel>
+                                <TextBlock Text="AI Model"   Style="{StaticResource SmallLabel}" Margin="0,0,0,4"/>
+                                <TextBlock Text="gpt-4o"     FontSize="13" FontWeight="SemiBold"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="1">
+                                <TextBlock Text="Pipeline"   Style="{StaticResource SmallLabel}" Margin="0,0,0,4"/>
+                                <TextBlock Text="5 Agents"   FontSize="13" FontWeight="SemiBold"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Temperature" Style="{StaticResource SmallLabel}" Margin="0,0,0,4"/>
+                                <TextBlock Text="0.2"         FontSize="13" FontWeight="SemiBold"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="3">
+                                <TextBlock Text="Max Tokens"  Style="{StaticResource SmallLabel}" Margin="0,0,0,4"/>
+                                <TextBlock Text="1200"        FontSize="13" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Progress -->
+                <Border x:Name="ProgressPanel" Style="{StaticResource Card}" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock x:Name="TxtProgressStep" Style="{StaticResource SectionTitle}" Text="Analyzing…"/>
+                        <ProgressBar IsIndeterminate="True" Height="8" Margin="0,6,0,8"
+                                     Style="{StaticResource FlatBar}"
+                                     Background="#E5E7EB" Foreground="#2563EB"/>
+                        <TextBlock x:Name="TxtProgressDetail" FontSize="11" Foreground="#5A6474"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Start Button -->
+                <Button x:Name="BtnAnalyze" Content="▶  Run Analysis"
+                        Click="BtnAnalyze_Click" IsEnabled="False"
+                        Padding="28,12" Background="#2563EB" Foreground="White"
+                        BorderBrush="Transparent" FontSize="14" FontWeight="SemiBold"
+                        HorizontalAlignment="Left" Margin="0,4,0,0"/>
+
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
