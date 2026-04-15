@@ -112,7 +112,7 @@
                                         <Border BorderBrush="#F0F2F5" BorderThickness="0,0,0,1" Padding="0,8">
                                             <TextBlock FontSize="12" TextWrapping="Wrap">
                                                 <Run Text="✓  " Foreground="#2563EB" FontWeight="Bold"/>
-                                                <Run Text="{Binding}"/>
+                                                <Run Text="{Binding Mode=OneWay}"/>
                                             </TextBlock>
                                         </Border>
                                     </DataTemplate>

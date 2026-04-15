@@ -259,7 +259,7 @@
 									<ItemsControl.ItemTemplate>
 										<DataTemplate>
 											<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
-                                                <Run Text="→  "/><Run Text="{Binding}"/>
+                                                <Run Text="→  "/><Run Text="{Binding Mode=OneWay}"/>
 											</TextBlock>
 										</DataTemplate>
 									</ItemsControl.ItemTemplate>
@@ -276,7 +276,7 @@
 									<ItemsControl.ItemTemplate>
 										<DataTemplate>
 											<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
-                                                <Run Text="•  "/><Run Text="{Binding}"/>
+                                                <Run Text="•  "/><Run Text="{Binding Mode=OneWay}"/>
 											</TextBlock>
 										</DataTemplate>
 									</ItemsControl.ItemTemplate>
@@ -286,7 +286,7 @@
 									<ItemsControl.ItemTemplate>
 										<DataTemplate>
 											<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
-                                                <Run Text="•  "/><Run Text="{Binding}"/>
+                                                <Run Text="•  "/><Run Text="{Binding Mode=OneWay}"/>
 											</TextBlock>
 										</DataTemplate>
 									</ItemsControl.ItemTemplate>
