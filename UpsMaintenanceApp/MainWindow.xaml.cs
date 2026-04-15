@@ -22,6 +22,78 @@ namespace UpsMaintenanceApp
         {
             InitializeComponent();
             DataContext = _vm;
+
+            // Wire Upload Visit page → runs the same pipeline
+            PageUpload.AnalysisRequested += async filePath =>
+            {
+                await Dispatcher.InvokeAsync(async () =>
+                {
+                    BtnLoadFile.IsEnabled = false;
+                    _vm.IsAnalyzing       = true;
+                    PageUpload.SetProgress("Parsing Excel…", "", true);
+                    try
+                    {
+                        var telemetry = ExcelParser.ParseTelemetry(filePath);
+                        var alarms    = ExcelParser.ParseAlarms(filePath);
+                        AlarmGrid.ItemsSource   = alarms;
+                        _vm.TotalAlarms         = alarms.Count;
+                        _vm.AlarmStorms         = CountStorms(alarms);
+                        _vm.DataQualityInfo     = $"Duration: {GetDuration(telemetry)}  |  Rows: {telemetry.Count:N0}";
+                        _vm.LogWindowInfo       = $"Log: {GetLogWindow(telemetry)}";
+                        var features = FeatureEngine.ComputeAll(telemetry, alarms);
+                        features.TryGetValue("VdcMean",          out double vdcMean);
+                        features.TryGetValue("VdcStd",           out double vdcStd);
+                        features.TryGetValue("AlarmRatePerHour", out double alarmRate);
+                        _vm.VdcMean = vdcMean; _vm.VdcStd = vdcStd; _vm.AlarmRate = alarmRate;
+                        _vm.FreqError = telemetry.Count > 0 ? telemetry.Average(r => Math.Abs(r.InputFrequency - 50.0)) : 0;
+                        BuildElectricalChart(telemetry);
+                        BuildAlarmChart(alarms);
+
+                        PageUpload.SetProgress("Running AI pipeline…", "5 agents processing…", true);
+                        string apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty;
+                        if (string.IsNullOrWhiteSpace(apiKey)) throw new InvalidOperationException("OPENAI_API_KEY not set. Configure it in Settings.");
+                        var result = await new AnalysisPipeline(apiKey).RunAsync(features);
+                        _lastResult = result;
+
+                        _vm.BatteryHealth   = result.Health.BatteryHealth;
+                        _vm.DcLinkHealth    = result.Health.DcLinkHealth;
+                        _vm.InverterHealth  = result.Health.PowerStageHealth;
+                        _vm.RectifierHealth = (result.Health.DcLinkHealth + result.Health.PowerStageHealth) / 2;
+                        _vm.ThermalStress   = result.Health.ThermalStress;
+                        _vm.OverallHealthIndex = (result.Health.BatteryHealth + result.Health.DcLinkHealth + result.Health.PowerStageHealth) / 3;
+                        _vm.InverterFailRisk = result.Prediction.InverterFail;
+                        _vm.RectifierFailRisk = result.Prediction.RectifierFail;
+                        _vm.BatteryFailRisk  = result.Prediction.BatteryFail;
+                        _vm.Urgency          = result.Prediction.Urgency;
+                        _vm.DcStability      = result.CoreSignal.DcStability;
+                        _vm.BatteryBehavior  = result.CoreSignal.BatteryBehavior;
+                        _vm.FrequencyStability = result.CoreSignal.FrequencyStability;
+                        _vm.StressLevel      = result.CoreSignal.StressLevel;
+                        _vm.RootCause        = result.EventCorrelation.RootCause;
+                        _vm.RootCauseConfidence = result.EventCorrelation.Confidence;
+                        _vm.Patterns         = new ObservableCollection<string>(result.EventCorrelation.Patterns);
+                        _vm.InsightSummary   = result.Insight.Summary;
+                        _vm.InsightConfidence = result.Insight.Confidence;
+                        _vm.TopIssues        = new ObservableCollection<string>(result.Insight.TopIssues);
+                        _vm.Actions          = new ObservableCollection<string>(result.Insight.Actions);
+                        _vm.AlertMessage     = result.Insight.Summary;
+                        _vm.PipelineStatus   = $"Analysis complete  •  {result.CompletedAt:HH:mm:ss}";
+
+                        // Navigate to Dashboard
+                        Nav_Click(NavDashboard, new RoutedEventArgs());
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    finally
+                    {
+                        _vm.IsAnalyzing       = false;
+                        BtnLoadFile.IsEnabled = true;
+                        PageUpload.SetProgress("", "", false);
+                    }
+                });
+            };
         }
 
         private async void BtnLoadFile_Click(object sender, RoutedEventArgs e)
@@ -82,7 +154,7 @@ namespace UpsMaintenanceApp
                 // ── AI Pipeline ────────────────────────────────────────────
                 _vm.PipelineStatus = "Running AI pipeline — Agent 1 / 5…";
                 var result = await new AnalysisPipeline(apiKey).RunAsync(features);
-
+                _lastResult = result;
                 // CoreSignal
                 _vm.DcStability        = result.CoreSignal.DcStability;
                 _vm.BatteryBehavior    = result.CoreSignal.BatteryBehavior;

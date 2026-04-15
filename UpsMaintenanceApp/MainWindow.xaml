@@ -59,7 +59,7 @@
             </Border>
 
             <!-- SCROLLABLE CONTENT -->
-            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="#F6F7FB">
+            <ScrollViewer x:Name="PageDashboard" Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="#F6F7FB">
                 <StackPanel Margin="12">
 
                     <!-- ── KPI STRIP ── -->
@@ -107,13 +107,7 @@
                             </StackPanel>
                         </Border>
                     </UniformGrid>
-                    <views:UploadVisitPage x:Name="PageUpload"    Visibility="Collapsed"/>
-
-                    <!-- Report -->
-                    <views:ReportPage      x:Name="PageReport"    Visibility="Collapsed"/>
-
-                    <!-- Settings -->
-                    <views:SettingsPage    x:Name="PageSettings"  Visibility="Collapsed"/>
+ 
                     <!-- ── ALERT BANNER ── -->
                     <Border Background="White" BorderBrush="#D7DCE3" BorderThickness="1"
                             CornerRadius="8" Margin="0,0,0,10">
@@ -344,6 +338,11 @@
 
                 </StackPanel>
             </ScrollViewer>
+            <!-- Navigation pages -->
+        <views:UploadVisitPage x:Name="PageUpload"   Visibility="Collapsed"/>
+        <views:ReportPage      x:Name="PageReport"   Visibility="Collapsed"/>
+        <views:SettingsPage    x:Name="PageSettings" Visibility="Collapsed"/>
+
         </Grid>
     </Grid>
 </Window>
