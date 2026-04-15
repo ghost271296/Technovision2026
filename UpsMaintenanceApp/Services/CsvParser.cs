@@ -9,12 +9,10 @@ using UpsMaintenanceApp.Models;
 namespace UpsMaintenanceApp.Services
 {
     /// <summary>
-    /// Parses Vertiv/Liebert UPS tab-separated DataLog and AlarmLog files.
+    /// Parses Vertiv/Liebert UPS semicolon-separated DataLog and AlarmLog files.
+    /// Separator auto-detected (semicolon / tab / comma).
     /// Date format: "20 January 2026   06:50:04:730 AM" (custom with milliseconds).
-    /// Row 0 = headers, Row 1 = metadata "Data/Alarm Log has created on…" (skipped),
-    /// Rows 2+ = data.
     /// </summary>
-    /// to commit
     public static class CsvParser
     {
         private static readonly string[] DateFormats =
@@ -52,8 +50,15 @@ namespace UpsMaintenanceApp.Services
             return DateTime.MinValue;
         }
 
-        private static char DetectSep(string header) =>
-            header.Count(c => c == '\t') >= header.Count(c => c == ',') ? '\t' : ',';
+        private static char DetectSep(string header)
+        {
+            int tabs       = header.Count(c => c == '\t');
+            int semicolons = header.Count(c => c == ';');
+            int commas     = header.Count(c => c == ',');
+            if (semicolons >= tabs && semicolons >= commas) return ';';
+            if (tabs >= commas) return '\t';
+            return ',';
+        }
 
         private static Dictionary<string, int> HeaderMap(string headerLine, char sep)
         {
