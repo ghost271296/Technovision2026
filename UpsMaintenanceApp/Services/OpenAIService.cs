@@ -9,8 +9,8 @@ namespace UpsMaintenanceApp.Services
     public class OpenAIClientService
     {
         private readonly ChatClient _client;
-        private const int MaxRetries     = 2;
-        private const int TimeoutSeconds = 30;
+        private const int MaxRetries     = 3;
+        private const int TimeoutSeconds = 60;
         private const int MaxTokens      = 1200;
 
         public OpenAIClientService(string apiKey)
