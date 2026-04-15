@@ -12,15 +12,15 @@
         <Border Background="White" BorderThickness="0,0,0,1" BorderBrush="#D7DCE3" Padding="24,16">
             <StackPanel>
                 <TextBlock Text="Upload Visit" FontSize="20" FontWeight="SemiBold"/>
-                <TextBlock Text="Load UPS DataLog and AlarmLog Excel file for predictive analysis"
+                <TextBlock Text="Load the DataLog and AlarmLog files (tab-separated .txt or .csv) for AI analysis"
                            FontSize="12" Foreground="#5A6474" Margin="0,4,0,0"/>
             </StackPanel>
         </Border>
 
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="24" MaxWidth="780" HorizontalAlignment="Left">
+            <StackPanel Margin="24" MaxWidth="800" HorizontalAlignment="Left">
 
-                <!-- Drop Zone -->
+                <!-- Drop Zone
                 <Border x:Name="DropZone" Background="White" CornerRadius="12" Padding="48"
                         BorderBrush="#D7DCE3" BorderThickness="2" Margin="0,0,0,16"
                         AllowDrop="True" Drop="DropZone_Drop" DragOver="DropZone_DragOver">
@@ -38,10 +38,18 @@
                                    FontSize="11" Foreground="#94A3B8"
                                    HorizontalAlignment="Center" Margin="0,14,0,0"/>
                     </StackPanel>
-                </Border>
+                </Border> -->
 
-                <!-- Selected File -->
-                <Border x:Name="FileInfoPanel" Style="{StaticResource Card}" Visibility="Collapsed">
+                <!-- File pair row -->
+                <Grid Margin="0,0,0,12">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="16"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Selected File
+                    <   Border x:Name="FileInfoPanel" Style="{StaticResource Card}" Visibility="Collapsed">
                     <Grid>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -57,7 +65,61 @@
                                 Background="Transparent" Foreground="#94A3B8"
                                 BorderBrush="Transparent" FontSize="16" VerticalAlignment="Center"/>
                     </Grid>
-                </Border>
+                    </Border> -->
+                    <!-- DataLog Card -->
+                    <Border Style="{StaticResource Card}" Margin="0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="① DataLog File"/>
+                            <Border x:Name="DropZoneData" Background="#F6F7FB" CornerRadius="8"
+                                    Padding="20,28" BorderBrush="#CBD5E1" BorderThickness="2"
+                                    AllowDrop="True" Drop="DropZoneData_Drop" DragOver="DropZone_DragOver"
+                                    Margin="0,0,0,10">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="📊" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Drag &amp; drop DataLog" FontSize="12" FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" Foreground="#374151"/>
+                                    <TextBlock Text="or" FontSize="11" Foreground="#9CA3AF"
+                                               HorizontalAlignment="Center" Margin="0,6"/>
+                                    <Button x:Name="BtnBrowseData" Content="Browse…" Click="BtnBrowseData_Click"
+                                            Padding="14,6" Background="#2563EB" Foreground="White"
+                                            BorderBrush="Transparent" HorizontalAlignment="Center" FontSize="12"/>
+                                </StackPanel>
+                            </Border>
+                            <!-- Selected file indicator -->
+                            <Border x:Name="DataFileInfo" Visibility="Collapsed"
+                                    Background="#F0FDF4" CornerRadius="6" Padding="10,7"
+                                    BorderBrush="#86EFAC" BorderThickness="1">
+                                <TextBlock x:Name="TxtDataFile" FontSize="11" Foreground="#166534" TextWrapping="Wrap"/>
+                            </Border>
+                        </StackPanel>
+                        </Border>
+                    <!-- AlarmLog Card -->
+                    <Border Grid.Column="2" Style="{StaticResource Card}" Margin="0">
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="② AlarmLog File"/>
+                            <Border x:Name="DropZoneAlarm" Background="#F6F7FB" CornerRadius="8"
+                                    Padding="20,28" BorderBrush="#CBD5E1" BorderThickness="2"
+                                    AllowDrop="True" Drop="DropZoneAlarm_Drop" DragOver="DropZone_DragOver"
+                                    Margin="0,0,0,10">
+                                <StackPanel HorizontalAlignment="Center">
+                                    <TextBlock Text="🔔" FontSize="36" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                    <TextBlock Text="Drag &amp; drop AlarmLog" FontSize="12" FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" Foreground="#374151"/>
+                                    <TextBlock Text="or" FontSize="11" Foreground="#9CA3AF"
+                                               HorizontalAlignment="Center" Margin="0,6"/>
+                                    <Button x:Name="BtnBrowseAlarm" Content="Browse…" Click="BtnBrowseAlarm_Click"
+                                            Padding="14,6" Background="#2563EB" Foreground="White"
+                                            BorderBrush="Transparent" HorizontalAlignment="Center" FontSize="12"/>
+                                </StackPanel>
+                            </Border>
+                            <Border x:Name="AlarmFileInfo" Visibility="Collapsed"
+                                    Background="#F0FDF4" CornerRadius="6" Padding="10,7"
+                                    BorderBrush="#86EFAC" BorderThickness="1">
+                                <TextBlock x:Name="TxtAlarmFile" FontSize="11" Foreground="#166534" TextWrapping="Wrap"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+                </Grid>    
 
                 <!-- Analysis Options -->
                 <Border Style="{StaticResource Card}">
