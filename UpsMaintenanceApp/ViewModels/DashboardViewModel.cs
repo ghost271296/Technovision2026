@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using System.Collections.ObjectModel;
+using LiveChartsCore.Kernel.Sketches;
 
 namespace UpsMaintenanceApp.ViewModels
 {

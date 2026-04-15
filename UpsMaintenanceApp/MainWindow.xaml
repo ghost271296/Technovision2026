@@ -6,343 +6,390 @@
         Title="Vertiv Predictive Maintenance Console"
         Width="1440" Height="860">
 
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="220"/>
+			<ColumnDefinition Width="*"/>
+		</Grid.ColumnDefinitions>
 
-        <!-- ═══ SIDEBAR ═══ -->
-        <Border Background="White" BorderThickness="0,0,1,0" BorderBrush="#D7DCE3">
-            <StackPanel Margin="16">
-                <TextBlock Text="Vertiv PM" FontSize="15" FontWeight="Bold" Margin="0,0,0,20"/>
-                <Button x:Name="NavDashboard" Content="📊  Dashboard"    Tag="Dashboard" Click="Nav_Click" Style="{StaticResource NavButton}" Foreground="#2563EB" FontWeight="SemiBold"/>
-                <Button x:Name="NavUpload"    Content="📁  Upload Visit"  Tag="Upload"    Click="Nav_Click" Style="{StaticResource NavButton}"/>
-                <Button x:Name="NavReport"    Content="📄  Report"        Tag="Report"    Click="Nav_Click" Style="{StaticResource NavButton}"/>
-                <Button x:Name="NavSettings"  Content="⚙   Settings"      Tag="Settings"  Click="Nav_Click" Style="{StaticResource NavButton}"/>
-                <Separator Margin="0,16"/>
-                <Button x:Name="BtnLoadFile" Content="📂  Load DataLog"
+		<!-- ═══ SIDEBAR ═══ -->
+		<Border Background="White" BorderThickness="0,0,1,0" BorderBrush="#D7DCE3">
+			<StackPanel Margin="16">
+				<TextBlock Text="Vertiv PM" FontSize="15" FontWeight="Bold" Margin="0,0,0,20"/>
+				<Button x:Name="NavDashboard" Content="📊  Dashboard"    Tag="Dashboard" Click="Nav_Click" Style="{StaticResource NavButton}" Foreground="#2563EB" FontWeight="SemiBold"/>
+				<Button x:Name="NavUpload"    Content="📁  Upload Visit"  Tag="Upload"    Click="Nav_Click" Style="{StaticResource NavButton}"/>
+				<Button x:Name="NavReport"    Content="📄  Report"        Tag="Report"    Click="Nav_Click" Style="{StaticResource NavButton}"/>
+				<Button x:Name="NavSettings"  Content="⚙   Settings"      Tag="Settings"  Click="Nav_Click" Style="{StaticResource NavButton}"/>
+				<Separator Margin="0,16"/>
+				<Button x:Name="BtnLoadFile" Content="📂  Load DataLog"
                         Click="BtnLoadFile_Click"
                         Padding="10,7" Background="#2563EB" Foreground="White"
                         BorderBrush="Transparent"/>
-                <ProgressBar IsIndeterminate="True" Height="3" Margin="0,10,0,4"
+				<ProgressBar IsIndeterminate="True" Height="10" Margin="0,10,0,4"
                              Visibility="{Binding IsAnalyzing, Converter={StaticResource BoolToVisibility}}"/>
-                <TextBlock Text="{Binding PipelineStatus}" FontSize="11"
+				<TextBlock Text="{Binding PipelineStatus}" FontSize="11"
                            Foreground="#5A6474" TextWrapping="Wrap"/>
-            </StackPanel>
-        </Border>
+			</StackPanel>
+		</Border>
 
-        <!-- ═══ MAIN ═══ -->
-        <Grid Grid.Column="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="56"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+		<!-- ═══ MAIN ═══ -->
+		<Grid Grid.Column="1">
+			<Grid.RowDefinitions>
+				<RowDefinition Height="56"/>
+				<RowDefinition Height="*"/>
+			</Grid.RowDefinitions>
 
-            <!-- TOPBAR -->
+			<!-- TOPBAR -->
 
-            <Border Background="White" BorderThickness="0,0,0,1" BorderBrush="#D7DCE3">
-                <Grid Margin="16,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
-                    <TextBlock Grid.Column="0" Text="{Binding AssetInfo}"
+			<Border Background="White" BorderThickness="0,0,0,1" BorderBrush="#D7DCE3">
+				<Grid Margin="16,0">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto"/>
+						<ColumnDefinition Width="*"/>
+						<ColumnDefinition Width="Auto"/>
+					</Grid.ColumnDefinitions>
+					<TextBlock Grid.Column="0" Text="{Binding AssetInfo}"
                             FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="1" Text="{Binding DataQualityInfo}"
+					<TextBlock Grid.Column="1" Text="{Binding DataQualityInfo}"
                             FontSize="12" Foreground="#5A6474"
                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    <TextBlock Grid.Column="2" Text="{Binding LogWindowInfo}"
+					<TextBlock Grid.Column="2" Text="{Binding LogWindowInfo}"
                             FontSize="11" Foreground="#5A6474" VerticalAlignment="Center"/>
-                </Grid>
-            </Border>
+				</Grid>
+			</Border>
 
-            <!-- SCROLLABLE CONTENT -->
-            <ScrollViewer x:Name="PageDashboard" Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="#F6F7FB">
-                <StackPanel Margin="12">
+			<!-- SCROLLABLE CONTENT -->
+			<ScrollViewer x:Name="PageDashboard" Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="#F6F7FB">
+				<StackPanel Margin="12">
 
-                    <!-- ── KPI STRIP ── -->
-                    <UniformGrid Rows="1" Columns="6" Margin="0,0,0,10">
-                        <Border Style="{StaticResource KpiBox}">
-                            <StackPanel>
-                                <TextBlock Text="Overall HI" Style="{StaticResource SmallLabel}"/>
-                                <TextBlock Text="{Binding OverallHealthIndex}" FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B"/>
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource KpiBox}">
-                            <StackPanel>
-                                <TextBlock Text="Alarm Rate" Style="{StaticResource SmallLabel}"/>
-                                <TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#DC2626">
+					<!-- ── KPI STRIP ── -->
+					<UniformGrid Rows="1" Columns="6" Margin="0,0,0,10">
+						<Border Style="{StaticResource KpiBox}">
+							<StackPanel>
+								<TextBlock Text="Overall HI" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding OverallHealthIndex}" FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B"/>
+							</StackPanel>
+						</Border>
+						<Border Style="{StaticResource KpiBox}">
+							<StackPanel>
+								<TextBlock Text="Alarm Rate" Style="{StaticResource SmallLabel}"/>
+								<TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#DC2626">
                                     <Run Text="{Binding AlarmRate, StringFormat=F0}"/><Run Text="/h"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource KpiBox}">
-                            <StackPanel>
-                                <TextBlock Text="Total Alarms" Style="{StaticResource SmallLabel}"/>
-                                <TextBlock Text="{Binding TotalAlarms}" FontSize="22" FontWeight="SemiBold"/>
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource KpiBox}">
-                            <StackPanel>
-                                <TextBlock Text="Alarm Storms" Style="{StaticResource SmallLabel}"/>
-                                <TextBlock Text="{Binding AlarmStorms}" FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B"/>
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource KpiBox}">
-                            <StackPanel>
-                                <TextBlock Text="Vdc Std" Style="{StaticResource SmallLabel}"/>
-                                <TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B">
+								</TextBlock>
+							</StackPanel>
+						</Border>
+						<Border Style="{StaticResource KpiBox}">
+							<StackPanel>
+								<TextBlock Text="Total Alarms" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding TotalAlarms}" FontSize="22" FontWeight="SemiBold"/>
+							</StackPanel>
+						</Border>
+						<Border Style="{StaticResource KpiBox}">
+							<StackPanel>
+								<TextBlock Text="Alarm Storms" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding AlarmStorms}" FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B"/>
+							</StackPanel>
+						</Border>
+						<Border Style="{StaticResource KpiBox}">
+							<StackPanel>
+								<TextBlock Text="Vdc Std" Style="{StaticResource SmallLabel}"/>
+								<TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B">
                                     <Run Text="{Binding VdcStd, StringFormat=F2}"/><Run Text="V"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                        <Border Style="{StaticResource KpiBox}" Margin="0">
-                            <StackPanel>
-                                <TextBlock Text="Freq Err" Style="{StaticResource SmallLabel}"/>
-                                <TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#DC2626">
+								</TextBlock>
+							</StackPanel>
+						</Border>
+						<Border Style="{StaticResource KpiBox}" Margin="0">
+							<StackPanel>
+								<TextBlock Text="Freq Err" Style="{StaticResource SmallLabel}"/>
+								<TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#DC2626">
                                     <Run Text="{Binding FreqError, StringFormat=F2}"/><Run Text="Hz"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </UniformGrid>
- 
-                    <!-- ── ALERT BANNER ── -->
-                    <Border Background="White" BorderBrush="#D7DCE3" BorderThickness="1"
+								</TextBlock>
+							</StackPanel>
+						</Border>
+					</UniformGrid>
+
+					<!-- ── ALERT BANNER ── -->
+					<Border Background="White" BorderBrush="#D7DCE3" BorderThickness="1"
                             CornerRadius="8" Margin="0,0,0,10">
-                        <Grid MinHeight="52">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="6"/>
-                                <ColumnDefinition Width="*"/>
-                            </Grid.ColumnDefinitions>
-                            <Border Grid.Column="0" Background="#DC2626" CornerRadius="7,0,0,7"/>
-                            <StackPanel Grid.Column="1" Margin="14,10" VerticalAlignment="Center">
-                                <TextBlock FontSize="13" FontWeight="SemiBold">
+						<Grid MinHeight="52">
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="6"/>
+								<ColumnDefinition Width="*"/>
+							</Grid.ColumnDefinitions>
+							<Border Grid.Column="0" Background="#DC2626" CornerRadius="7,0,0,7"/>
+							<StackPanel Grid.Column="1" Margin="14,10" VerticalAlignment="Center">
+								<TextBlock FontSize="13" FontWeight="SemiBold">
                                     <Run Text="⚠  "/><Run Text="{Binding Urgency}"/><Run Text=" Attention"/>
-                                </TextBlock>
-                                <TextBlock Text="{Binding AlertMessage}" FontSize="11"
+								</TextBlock>
+								<TextBlock Text="{Binding AlertMessage}" FontSize="11"
                                            Foreground="#5A6474" TextWrapping="Wrap"/>
-                            </StackPanel>
-                        </Grid>
-                    </Border>
+							</StackPanel>
+						</Grid>
+					</Border>
 
-                    <!-- ── HEALTH + RISK ── -->
-                    <Grid Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="2*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+					<!-- ── HEALTH + RISK ── -->
+					<Grid Margin="0,0,0,10">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="590*"/>
+							<ColumnDefinition Width="589*"/>
+						</Grid.ColumnDefinitions>
 
-                        <Border Style="{StaticResource Card}" Margin="0,0,8,0">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource SectionTitle}" Text="Subsystem Health"/>
-                                <!-- Rectifier -->
-                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/><ColumnDefinition Width="32"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="Rectifier" FontSize="12" VerticalAlignment="Center"/>
-                                    <ProgressBar Grid.Column="1" Value="{Binding RectifierHealth}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#F59E0B"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding RectifierHealth}" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"/>
-                                </Grid>
-                                <!-- Inverter -->
-                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/><ColumnDefinition Width="32"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="Inverter" FontSize="12" VerticalAlignment="Center"/>
-                                    <ProgressBar Grid.Column="1" Value="{Binding InverterHealth}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#16A34A"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding InverterHealth}" FontSize="12" FontWeight="Bold" Foreground="#16A34A"/>
-                                </Grid>
-                                <!-- Battery -->
-                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/><ColumnDefinition Width="32"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="Battery" FontSize="12" VerticalAlignment="Center"/>
-                                    <ProgressBar Grid.Column="1" Value="{Binding BatteryHealth}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#F59E0B"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding BatteryHealth}" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"/>
-                                </Grid>
-                                <!-- DC Link -->
-                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/><ColumnDefinition Width="32"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="DC Link" FontSize="12" VerticalAlignment="Center"/>
-                                    <ProgressBar Grid.Column="1" Value="{Binding DcLinkHealth}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#F59E0B"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding DcLinkHealth}" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"/>
-                                </Grid>
-                                <!-- Thermal Stress -->
-                                <Grid Margin="0,3"><Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/><ColumnDefinition Width="32"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="Thermal" FontSize="12" VerticalAlignment="Center"/>
-                                    <ProgressBar Grid.Column="1" Value="{Binding ThermalStress}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#DC2626"/>
-                                    <TextBlock Grid.Column="2" Text="{Binding ThermalStress}" FontSize="12" FontWeight="Bold" Foreground="#DC2626"/>
-                                </Grid>
-                            </StackPanel>
-                        </Border>
+						<Border Style="{StaticResource Card}" Margin="0,0,10,0">
+							<StackPanel>
+								<TextBlock Style="{StaticResource SectionTitle}" Text="Subsystem Health"/>
+								<!-- Rectifier -->
+								<Grid Margin="0,3">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="100"/>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="32"/>
+									</Grid.ColumnDefinitions>
+									<TextBlock Text="Rectifier" FontSize="12" VerticalAlignment="Center"/>
+									<ProgressBar Grid.Column="1" Value="{Binding RectifierHealth}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#F59E0B"/>
+									<TextBlock Grid.Column="2" Text="{Binding RectifierHealth}" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"/>
+								</Grid>
+								<!-- Inverter -->
+								<Grid Margin="0,3">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="100"/>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="32"/>
+									</Grid.ColumnDefinitions>
+									<TextBlock Text="Inverter" FontSize="12" VerticalAlignment="Center"/>
+									<ProgressBar Grid.Column="1" Value="{Binding InverterHealth}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#16A34A"/>
+									<TextBlock Grid.Column="2" Text="{Binding InverterHealth}" FontSize="12" FontWeight="Bold" Foreground="#16A34A"/>
+								</Grid>
+								<!-- Battery -->
+								<Grid Margin="0,3">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="100"/>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="32"/>
+									</Grid.ColumnDefinitions>
+									<TextBlock Text="Battery" FontSize="12" VerticalAlignment="Center"/>
+									<ProgressBar Grid.Column="1" Value="{Binding BatteryHealth}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#F59E0B"/>
+									<TextBlock Grid.Column="2" Text="{Binding BatteryHealth}" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"/>
+								</Grid>
+								<!-- DC Link -->
+								<Grid Margin="0,3">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="100"/>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="32"/>
+									</Grid.ColumnDefinitions>
+									<TextBlock Text="DC Link" FontSize="12" VerticalAlignment="Center"/>
+									<ProgressBar Grid.Column="1" Value="{Binding DcLinkHealth}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#F59E0B"/>
+									<TextBlock Grid.Column="2" Text="{Binding DcLinkHealth}" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"/>
+								</Grid>
+								<!-- Thermal Stress -->
+								<Grid Margin="0,3">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="100"/>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="32"/>
+									</Grid.ColumnDefinitions>
+									<TextBlock Text="Thermal" FontSize="12" VerticalAlignment="Center"/>
+									<ProgressBar Grid.Column="1" Value="{Binding ThermalStress}" Style="{StaticResource FlatBar}" Height="6" Margin="8,0" Background="#E5E7EB" Foreground="#DC2626"/>
+									<TextBlock Grid.Column="2" Text="{Binding ThermalStress}" FontSize="12" FontWeight="Bold" Foreground="#DC2626"/>
+								</Grid>
+							</StackPanel>
+						</Border>
 
-                        <Border Style="{StaticResource Card}">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource SectionTitle}" Text="Risk Forecast"/>
-                                <!-- Inverter -->
-                                <Grid Margin="0,2"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="40"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="Inverter Fail" FontSize="12"/>
-                                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold" Foreground="#DC2626"><Run Text="{Binding InverterFailRisk}"/><Run Text="%"/></TextBlock>
-                                </Grid>
-                                <ProgressBar Value="{Binding InverterFailRisk}" Style="{StaticResource FlatBar}" Height="5" Margin="0,2,0,10" Background="#E5E7EB" Foreground="#DC2626"/>
-                                <!-- Rectifier -->
-                                <Grid Margin="0,2"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="40"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="Rectifier Fail" FontSize="12"/>
-                                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"><Run Text="{Binding RectifierFailRisk}"/><Run Text="%"/></TextBlock>
-                                </Grid>
-                                <ProgressBar Value="{Binding RectifierFailRisk}" Style="{StaticResource FlatBar}" Height="5" Margin="0,2,0,10" Background="#E5E7EB" Foreground="#F59E0B"/>
-                                <!-- Battery -->
-                                <Grid Margin="0,2"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="40"/></Grid.ColumnDefinitions>
-                                    <TextBlock Text="Battery Fail" FontSize="12"/>
-                                    <TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"><Run Text="{Binding BatteryFailRisk}"/><Run Text="%"/></TextBlock>
-                                </Grid>
-                                <ProgressBar Value="{Binding BatteryFailRisk}" Style="{StaticResource FlatBar}" Height="5" Margin="0,2,0,0" Background="#E5E7EB" Foreground="#F59E0B"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+						<Border Style="{StaticResource Card}" RenderTransformOrigin="0.5,0.5" Margin="1,1,-2,1" Grid.Column="1">
+							<Border.RenderTransform>
+								<TransformGroup>
+									<ScaleTransform/>
+									<SkewTransform/>
+									<RotateTransform Angle="-0.05"/>
+									<TranslateTransform/>
+								</TransformGroup>
+							</Border.RenderTransform>
+							<StackPanel>
+								<TextBlock Style="{StaticResource SectionTitle}" Text="Risk Forecast"/>
+								<!-- Inverter -->
+								<Grid Margin="0,2">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="40"/>
+									</Grid.ColumnDefinitions>
+									<TextBlock Text="Inverter Fail" FontSize="12"/>
+									<TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold" Foreground="#DC2626"><Run Text="{Binding InverterFailRisk}"/><Run Text="%"/></TextBlock>
+								</Grid>
+								<ProgressBar Value="{Binding InverterFailRisk}" Style="{StaticResource FlatBar}" Height="5" Margin="0,2,0,10" Background="#E5E7EB" Foreground="#DC2626"/>
+								<!-- Rectifier -->
+								<Grid Margin="0,2">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="40"/>
+									</Grid.ColumnDefinitions>
+									<TextBlock Text="Rectifier Fail" FontSize="12"/>
+									<TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"><Run Text="{Binding RectifierFailRisk}"/><Run Text="%"/></TextBlock>
+								</Grid>
+								<ProgressBar Value="{Binding RectifierFailRisk}" Style="{StaticResource FlatBar}" Height="5" Margin="0,2,0,10" Background="#E5E7EB" Foreground="#F59E0B"/>
+								<!-- Battery -->
+								<Grid Margin="0,2">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*"/>
+										<ColumnDefinition Width="40"/>
+									</Grid.ColumnDefinitions>
+									<TextBlock Text="Battery Fail" FontSize="12"/>
+									<TextBlock Grid.Column="1" FontSize="12" FontWeight="Bold" Foreground="#F59E0B"><Run Text="{Binding BatteryFailRisk}"/><Run Text="%"/></TextBlock>
+								</Grid>
+								<ProgressBar Value="{Binding BatteryFailRisk}" Style="{StaticResource FlatBar}" Height="5" Margin="0,2,0,0" Background="#E5E7EB" Foreground="#F59E0B"/>
+							</StackPanel>
+						</Border>
+					</Grid>
 
-                    <!-- ── ROOT CAUSE + AI INSIGHT ── -->
-                    <Grid Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+					<!-- ── ROOT CAUSE + AI INSIGHT ── -->
+					<Grid Margin="0,0,0,10">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
 
-                        <Border Style="{StaticResource Card}" Margin="0,0,8,0">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource SectionTitle}" Text="Root Cause Analysis"/>
-                                <TextBlock Text="{Binding RootCause}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <TextBlock FontSize="11" Foreground="#5A6474" Margin="0,0,0,8">
+						<Border Style="{StaticResource Card}" Margin="0,0,8,0">
+							<StackPanel>
+								<TextBlock Style="{StaticResource SectionTitle}" Text="Root Cause Analysis"/>
+								<TextBlock Text="{Binding RootCause}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
+								<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,0,0,8">
                                     <Run Text="Confidence: "/><Run Text="{Binding RootCauseConfidence}" FontWeight="SemiBold"/>
-                                </TextBlock>
-                                <TextBlock Text="Detected Patterns:" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <ItemsControl ItemsSource="{Binding Patterns}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
+								</TextBlock>
+								<TextBlock Text="Detected Patterns:" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+								<ItemsControl ItemsSource="{Binding Patterns}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate>
+											<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
                                                 <Run Text="→  "/><Run Text="{Binding}"/>
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                            </StackPanel>
-                        </Border>
+											</TextBlock>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+							</StackPanel>
+						</Border>
 
-                        <Border Style="{StaticResource Card}">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource SectionTitle}" Text="AI Insight Engine"/>
-                                <TextBlock Text="{Binding InsightSummary}" FontSize="11" Foreground="#5A6474" TextWrapping="Wrap" Margin="0,0,0,8"/>
-                                <TextBlock Text="Top Issues:" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
-                                <ItemsControl ItemsSource="{Binding TopIssues}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
+						<Border Style="{StaticResource Card}" Margin="0,0,4,0" Grid.Column="1">
+							<StackPanel>
+								<TextBlock Style="{StaticResource SectionTitle}" Text="AI Insight Engine"/>
+								<TextBlock Text="{Binding InsightSummary}" FontSize="11" Foreground="#5A6474" TextWrapping="Wrap" Margin="0,0,0,8"/>
+								<TextBlock Text="Top Issues:" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+								<ItemsControl ItemsSource="{Binding TopIssues}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate>
+											<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
                                                 <Run Text="•  "/><Run Text="{Binding}"/>
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <TextBlock Text="Recommended Actions:" FontSize="11" FontWeight="SemiBold" Margin="0,8,0,4"/>
-                                <ItemsControl ItemsSource="{Binding Actions}">
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
+											</TextBlock>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+								<TextBlock Text="Recommended Actions:" FontSize="11" FontWeight="SemiBold" Margin="0,8,0,4"/>
+								<ItemsControl ItemsSource="{Binding Actions}">
+									<ItemsControl.ItemTemplate>
+										<DataTemplate>
+											<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
                                                 <Run Text="•  "/><Run Text="{Binding}"/>
-                                            </TextBlock>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
-                                </ItemsControl>
-                                <Separator Margin="0,8"/>
-                                <TextBlock FontSize="11">
+											</TextBlock>
+										</DataTemplate>
+									</ItemsControl.ItemTemplate>
+								</ItemsControl>
+								<Separator Margin="0,8"/>
+								<TextBlock FontSize="11">
                                     <Run Text="Confidence: " FontWeight="SemiBold"/>
                                     <Run Text="{Binding InsightConfidence}" Foreground="#16A34A" FontWeight="SemiBold"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+								</TextBlock>
+							</StackPanel>
+						</Border>
+					</Grid>
 
-                    <!-- ── CHARTS ── -->
-                    <Grid Margin="0,0,0,10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
+					<!-- ── CHARTS ── -->
+					<Grid Margin="0,0,0,10">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="*"/>
+							<ColumnDefinition Width="*"/>
+						</Grid.ColumnDefinitions>
 
-                        <Border Style="{StaticResource Card}" Margin="0,0,8,0">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource SectionTitle}" Text="Electrical Trends"/>
-                                <lvc:CartesianChart Series="{Binding ElectricalSeries}"
+						<Border Style="{StaticResource Card}" Margin="0,0,8,0">
+							<StackPanel>
+								<TextBlock Style="{StaticResource SectionTitle}" Text="Electrical Trends"/>
+								<lvc:CartesianChart Series="{Binding ElectricalSeries}"
                                                     XAxes="{Binding TimeAxis}"
                                                     Height="140" Margin="0,0,0,6"/>
-                                <TextBlock FontSize="11" Foreground="#5A6474">
+								<TextBlock FontSize="11" Foreground="#5A6474">
                                     <Run Text="Vdc Mean: "/><Run Text="{Binding VdcMean, StringFormat=F1}"/><Run Text="V  |  Std: "/><Run Text="{Binding VdcStd, StringFormat=F2}"/><Run Text="V"/>
-                                </TextBlock>
-                            </StackPanel>
-                        </Border>
+								</TextBlock>
+							</StackPanel>
+						</Border>
 
-                        <Border Style="{StaticResource Card}">
-                            <StackPanel>
-                                <TextBlock Style="{StaticResource SectionTitle}" Text="Alarm Distribution"/>
-                                <lvc:CartesianChart Series="{Binding AlarmSeries}"
+						<Border Style="{StaticResource Card}" Grid.Column="1" Margin="0,0,-10,0">
+							<StackPanel>
+								<TextBlock Style="{StaticResource SectionTitle}" Text="Alarm Distribution"/>
+								<lvc:CartesianChart Series="{Binding AlarmSeries}"
                                                     XAxes="{Binding AlarmAxis}"
                                                     Height="140"/>
-                            </StackPanel>
-                        </Border>
-                    </Grid>
+							</StackPanel>
+						</Border>
+					</Grid>
 
-                    <!-- ── SIGNAL ANALYSIS ── -->
-                    <Border Style="{StaticResource Card}">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource SectionTitle}" Text="Signal Analysis"/>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/><ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel>
-                                    <TextBlock Text="DC Stability"  Style="{StaticResource SmallLabel}"/>
-                                    <TextBlock Text="{Binding DcStability}" FontSize="13" FontWeight="SemiBold"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="Battery"       Style="{StaticResource SmallLabel}"/>
-                                    <TextBlock Text="{Binding BatteryBehavior}" FontSize="13" FontWeight="SemiBold"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="2">
-                                    <TextBlock Text="Frequency"     Style="{StaticResource SmallLabel}"/>
-                                    <TextBlock Text="{Binding FrequencyStability}" FontSize="13" FontWeight="SemiBold"/>
-                                </StackPanel>
-                                <StackPanel Grid.Column="3">
-                                    <TextBlock Text="Stress Level"  Style="{StaticResource SmallLabel}"/>
-                                    <TextBlock Text="{Binding StressLevel}" FontSize="13" FontWeight="SemiBold"/>
-                                </StackPanel>
-                            </Grid>
-                        </StackPanel>
-                    </Border>
+					<!-- ── SIGNAL ANALYSIS ── -->
+					<Border Style="{StaticResource Card}">
+						<StackPanel>
+							<TextBlock Style="{StaticResource SectionTitle}" Text="Signal Analysis"/>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<StackPanel>
+									<TextBlock Text="DC Stability"  Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding DcStability}" FontSize="13" FontWeight="SemiBold"/>
+								</StackPanel>
+								<StackPanel Grid.Column="1">
+									<TextBlock Text="Battery"       Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding BatteryBehavior}" FontSize="13" FontWeight="SemiBold"/>
+								</StackPanel>
+								<StackPanel Grid.Column="2">
+									<TextBlock Text="Frequency"     Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding FrequencyStability}" FontSize="13" FontWeight="SemiBold"/>
+								</StackPanel>
+								<StackPanel Grid.Column="3">
+									<TextBlock Text="Stress Level"  Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding StressLevel}" FontSize="13" FontWeight="SemiBold"/>
+								</StackPanel>
+							</Grid>
+						</StackPanel>
+					</Border>
 
-                    <!-- ── ALARM LOG ── -->
-                    <Border Style="{StaticResource Card}">
-                        <StackPanel>
-                            <TextBlock Style="{StaticResource SectionTitle}" Text="Alarm Log"/>
-                            <DataGrid x:Name="AlarmGrid"
+					<!-- ── ALARM LOG ── -->
+					<Border Style="{StaticResource Card}">
+						<StackPanel>
+							<TextBlock Style="{StaticResource SectionTitle}" Text="Alarm Log"/>
+							<DataGrid x:Name="AlarmGrid"
                                       AutoGenerateColumns="False" IsReadOnly="True"
                                       MaxHeight="220" FontSize="11"
                                       Background="White" BorderThickness="0"
                                       GridLinesVisibility="Horizontal"
                                       HorizontalGridLinesBrush="#F0F2F5"
                                       RowBackground="White" AlternatingRowBackground="#FAFBFD">
-                                <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Time"        Binding="{Binding OccurredAt, StringFormat=HH:mm:ss}" Width="80"/>
-                                    <DataGridTextColumn Header="Code"        Binding="{Binding AlarmCode}"   Width="90"/>
-                                    <DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
-                                    <DataGridTextColumn Header="Category"    Binding="{Binding Category}"    Width="100"/>
-                                    <DataGridTextColumn Header="Severity"    Binding="{Binding Severity}"    Width="80"/>
-                                    <DataGridTextColumn Header="Status"      Binding="{Binding Status}"      Width="70"/>
-                                </DataGrid.Columns>
-                            </DataGrid>
-                        </StackPanel>
-                    </Border>
+								<DataGrid.Columns>
+									<DataGridTextColumn Header="Time"        Binding="{Binding OccurredAt, StringFormat=HH:mm:ss}" Width="80"/>
+									<DataGridTextColumn Header="Code"        Binding="{Binding AlarmCode}"   Width="90"/>
+									<DataGridTextColumn Header="Description" Binding="{Binding Description}" Width="*"/>
+									<DataGridTextColumn Header="Category"    Binding="{Binding Category}"    Width="100"/>
+									<DataGridTextColumn Header="Severity"    Binding="{Binding Severity}"    Width="80"/>
+									<DataGridTextColumn Header="Status"      Binding="{Binding Status}"      Width="70"/>
+								</DataGrid.Columns>
+							</DataGrid>
+						</StackPanel>
+					</Border>
 
-                </StackPanel>
-            </ScrollViewer>
-            <!-- Navigation pages -->
-        <views:UploadVisitPage x:Name="PageUpload"   Visibility="Collapsed"/>
-        <views:ReportPage      x:Name="PageReport"   Visibility="Collapsed"/>
-        <views:SettingsPage    x:Name="PageSettings" Visibility="Collapsed"/>
+				</StackPanel>
+			</ScrollViewer>
+			<!-- Navigation pages -->
+			<views:UploadVisitPage x:Name="PageUpload"   Visibility="Collapsed"/>
+			<views:ReportPage      x:Name="PageReport"   Visibility="Collapsed"/>
+			<views:SettingsPage    x:Name="PageSettings" Visibility="Collapsed"/>
 
-        </Grid>
-    </Grid>
+		</Grid>
+	</Grid>
 </Window>

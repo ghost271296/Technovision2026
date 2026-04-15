@@ -11,10 +11,10 @@
   </PropertyGroup>
  
   <ItemGroup>
-    <PackageReference Include="ClosedXML" Version="0.102.2" />
-    <PackageReference Include="OpenAI" Version="2.1.0" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
-    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0-rc3.5" />
+    <PackageReference Include="ClosedXML" Version="0.105.0" />
+    <PackageReference Include="OpenAI" Version="2.10.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
+    <PackageReference Include="LiveChartsCore.SkiaSharpView.WPF" Version="2.0.0" />
     
   </ItemGroup>
  

@@ -11,6 +11,7 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using SkiaSharp;
+using System.Windows.Controls;
 
 namespace UpsMaintenanceApp
 {
@@ -105,8 +106,10 @@ namespace UpsMaintenanceApp
             };
             if (dialog.ShowDialog() != true) return;
 
-            string apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(apiKey))
+            //string apiKey = Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? string.Empty;
+            string apiKey = "sk - proj - ul3eclYQOX8KfjlECLLbQ9NCgpH8P5mQo8nW7CuHW5x2sijX3b0GoWpWgdLEqshDPRYstZbf2qT3BlbkFJE - PGpLLiaN7XiRbjDI3qHkm9eMKHIYtBW7TK7zX8c449M1HsS5CDopWUzanoFedj2QBZ - GuTYA";
+
+			if (string.IsNullOrWhiteSpace(apiKey))
             {
                 MessageBox.Show(
                     "Set the OPENAI_API_KEY environment variable before running.",
