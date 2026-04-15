@@ -10,12 +10,14 @@ namespace UpsMaintenanceApp.Services
     {
         private readonly ChatClient _client;
         private const int MaxRetries     = 3;
-        private const int TimeoutSeconds = 60;
-        private const int MaxTokens      = 1200;
+        private const int TimeoutSeconds = 90;
+        private const int MaxTokens      = 2000;
 
-        public OpenAIClientService(string apiKey)
+        /// <param name="apiKey">OpenAI API key.</param>
+        /// <param name="model">Model ID. Defaults to gpt-4o which supports JSON mode.</param>
+        public OpenAIClientService(string apiKey, string model = "gpt-4o")
         {
-            _client = new OpenAIClient(apiKey).GetChatClient("gpt-4o");
+            _client = new OpenAIClient(apiKey).GetChatClient(model);
         }
 
         public async Task<string> CallAsync(string systemPrompt, string userPrompt)
@@ -30,7 +32,7 @@ namespace UpsMaintenanceApp.Services
                 {
                     var options = new ChatCompletionOptions
                     {
-                        Temperature         = 0.2f,
+                        Temperature         = 0.1f,   // lower = more deterministic / factual
                         MaxOutputTokenCount = MaxTokens,
                         ResponseFormat      = ChatResponseFormat.CreateJsonObjectFormat()
                     };
@@ -50,11 +52,13 @@ namespace UpsMaintenanceApp.Services
                 }
                 catch (OperationCanceledException ex) when (cts.IsCancellationRequested)
                 {
-                    lastEx = new TimeoutException($"Timed out after {TimeoutSeconds}s.", ex);
+                    lastEx = new TimeoutException($"Agent timed out after {TimeoutSeconds}s.", ex);
                 }
                 catch (Exception ex)
                 {
-                    if (ex.Message.Contains("401") || ex.Message.Contains("403") || ex.Message.Contains("400"))
+                    // Auth errors are unrecoverable — fail immediately
+                    if (ex.Message.Contains("401") || ex.Message.Contains("403") ||
+                        ex.Message.Contains("400") || ex.Message.Contains("invalid_api_key"))
                         throw;
                     lastEx = ex;
                 }

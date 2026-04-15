@@ -18,18 +18,26 @@ namespace UpsMaintenanceApp.Services
             new() { PropertyNameCaseInsensitive = true };
 
         private const string SystemPrompt =
-            "You are a UPS failure pattern analyst. Detect failure chains and correlations from telemetry metrics AND the alarm log. " +
-            "IMPORTANT alarm log rules: " +
-            "- Entries WITHOUT 'X - ' prefix = alarm/status is ACTIVE (e.g. 'Inverter_Fail' means inverter has failed). " +
-            "- Entries WITH 'X - ' prefix = alarm/status was DEACTIVATED/REMOVED (e.g. 'X - Inverter_ON' means inverter switched OFF, 'X - Load_ON_Inverter' means load removed from inverter). " +
-            "Use the sequence and timing of alarms to identify cause-effect chains. " +
-            "Respond in JSON only with: Patterns (array of up to 5 concise strings describing each chain), " +
-            "RootCause (string — the most probable underlying cause), Confidence (Low/Medium/High).";
+            "You are a UPS failure pattern analyst. " +
+            "Analyze the alarm sequence and telemetry to identify cause-effect chains and the root cause. " +
+            "Follow all CRITICAL ANALYSIS RULES in the context strictly:\n" +
+            "- Only identify fault patterns that occurred during active online operation.\n" +
+            "- Entries with 'X - ' prefix are DEACTIVATED/CLEARED states, not new faults.\n" +
+            "  Example: 'X - Inverter_ON' means the inverter was commanded OFF (intentional), NOT a failure.\n" +
+            "  Example: 'X - Load_ON_Inverter' means load moved off inverter (intentional action).\n" +
+            "- Entries WITHOUT 'X - ' prefix are ACTIVE faults/alerts at that timestamp.\n" +
+            "- Look for sequences: a fault alarm followed shortly by 'X - SomeStatus' often means the " +
+            "  UPS responded to the fault by switching modes (expected protective behavior).\n" +
+            "Respond in strict JSON only with: " +
+            "Patterns (array of up to 5 strings describing distinct fault chains during online operation), " +
+            "RootCause (string — the single most probable underlying cause), " +
+            "Confidence (Low / Medium / High).";
 
         public EventCorrelationAgent(OpenAIClientService ai) => _ai = ai;
 
         public async Task<EventCorrelationResult> AnalyzeAsync(
             Dictionary<string, double> features,
+            string operationalContext,
             string alarmContext)
         {
             features.TryGetValue("VdcMean",          out double vdcMean);
@@ -40,11 +48,12 @@ namespace UpsMaintenanceApp.Services
             features.TryGetValue("AlarmRatePerHour", out double alarmRate);
 
             string user =
+                $"{operationalContext}\n" +
                 $"=== TELEMETRY METRICS ===\n" +
-                $"VdcMean={vdcMean:F2}V, VdcStd={vdcStd:F4}V\n" +
-                $"VinAvg={vinAvg:F2}V, VinUnbalance={vinUnbal:F4}pu\n" +
-                $"RbattProxy={rbatt:F4}Ω, AlarmRate={alarmRate:F2}/hr\n\n" +
-                $"=== ALARM LOG (chronological) ===\n{alarmContext}";
+                $"VdcMean={vdcMean:F2} V, VdcStd={vdcStd:F4} V\n" +
+                $"VinAvg={vinAvg:F2} V, VinUnbalance={vinUnbal:F4} pu\n" +
+                $"RbattProxy={rbatt:F4} Ω, AlarmRate={alarmRate:F2}/hr\n\n" +
+                $"{alarmContext}";
 
             string json = await _ai.CallAsync(SystemPrompt, user);
             return JsonSerializer.Deserialize<EventCorrelationResult>(json, _opts)

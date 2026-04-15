@@ -154,7 +154,7 @@ namespace UpsMaintenanceApp
             var progress = new Progress<string>(msg =>
                 Dispatcher.InvokeAsync(() => _vm.PipelineStatus = msg));
 
-            var result = await new AnalysisPipeline(apiKey).RunAsync(features, alarmContext, progress);
+            var result = await new AnalysisPipeline(apiKey, GetModel()).RunAsync(features, alarmContext, progress);
             _lastResult = result;
 
             // ── Populate ViewModel ─────────────────────────────────────────────
@@ -199,26 +199,28 @@ namespace UpsMaintenanceApp
         {
             string? env = Environment.GetEnvironmentVariable("OPENAI_API_KEY");
             if (!string.IsNullOrWhiteSpace(env)) return env;
+            return LoadSettings()?.ApiKey ?? string.Empty;
+        }
 
+        private static string GetModel()
+        {
+            return LoadSettings()?.Model ?? "gpt-4o";
+        }
+
+        private static AppSettings? LoadSettings()
+        {
             try
             {
                 string path = System.IO.Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
                     "UpsMaintenanceApp", "settings.json");
-                if (System.IO.File.Exists(path))
-                {
-                    var s = JsonSerializer.Deserialize<AppSettings>(
-                                System.IO.File.ReadAllText(path));
-                    if (!string.IsNullOrWhiteSpace(s?.ApiKey))
-                    {
-                        Environment.SetEnvironmentVariable("OPENAI_API_KEY", s.ApiKey);
-                        return s.ApiKey;
-                    }
-                }
+                if (!System.IO.File.Exists(path)) return null;
+                var s = JsonSerializer.Deserialize<AppSettings>(System.IO.File.ReadAllText(path));
+                if (!string.IsNullOrWhiteSpace(s?.ApiKey))
+                    Environment.SetEnvironmentVariable("OPENAI_API_KEY", s.ApiKey);
+                return s;
             }
-            catch { }
-
-            return string.Empty;
+            catch { return null; }
         }
 
         // ── Alarm context builder ─────────────────────────────────────────────

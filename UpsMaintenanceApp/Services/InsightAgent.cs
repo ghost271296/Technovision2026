@@ -19,13 +19,19 @@ namespace UpsMaintenanceApp.Services
             new() { PropertyNameCaseInsensitive = true };
 
         private const string SystemPrompt =
-            "You are a UPS maintenance advisor. Generate concise, actionable maintenance insights " +
-            "based on all previous analysis stages AND the alarm log. " +
-            "IMPORTANT alarm log rules: entries WITHOUT 'X - ' prefix = ACTIVE alarm/failure. " +
-            "Entries WITH 'X - ' prefix = that status was DEACTIVATED (e.g. 'X - Inverter_ON' = inverter is currently OFF). " +
-            "Respond in JSON only with: Summary (1-2 sentence string), " +
-            "TopIssues (array of max 4 strings), Actions (array of max 4 actionable strings), " +
-            "Confidence (Low/Medium/High).";
+            "You are a senior UPS maintenance advisor writing an executive summary for a field engineer. " +
+            "Synthesize all analysis stages and the raw alarm log into actionable maintenance guidance. " +
+            "Follow all CRITICAL ANALYSIS RULES in the context:\n" +
+            "- Only report issues observed during normal online operation.\n" +
+            "- Clearly distinguish between GENUINE FAULTS (active alarms without X- prefix) " +
+            "and INTENTIONAL ACTIONS (X- prefixed alarms = commanded-off states, mode changes).\n" +
+            "- If the UPS was intentionally off/bypassed for much of the log, state this explicitly " +
+            "and limit fault analysis to the online periods.\n" +
+            "Respond in strict JSON only with: " +
+            "Summary (2-3 sentence plain-English summary of the UPS condition during online operation), " +
+            "TopIssues (array of max 4 strings — only genuine faults, not intentional shutdowns), " +
+            "Actions (array of max 4 specific, prioritised maintenance action strings), " +
+            "Confidence (Low / Medium / High).";
 
         public InsightAgent(OpenAIClientService ai) => _ai = ai;
 
@@ -34,22 +40,25 @@ namespace UpsMaintenanceApp.Services
             HealthResult           health,
             EventCorrelationResult events,
             PredictionResult       prediction,
+            string                 operationalContext,
             string                 alarmContext)
         {
             string patterns = string.Join("; ", events.Patterns);
             string obs      = string.Join("; ", signal.KeyObservations);
 
             string user =
-                $"=== ANALYSIS RESULTS ===\n" +
-                $"Urgency={prediction.Urgency}, Stress={signal.StressLevel}\n" +
+                $"{operationalContext}\n" +
+                $"=== FULL ANALYSIS RESULTS ===\n" +
+                $"Urgency: {prediction.Urgency}  |  Stress: {signal.StressLevel}\n" +
                 $"Failure Risks: Battery={prediction.BatteryFail}%, " +
                 $"Inverter={prediction.InverterFail}%, Rectifier={prediction.RectifierFail}%\n" +
-                $"Health: Battery={health.BatteryHealth}, DC Link={health.DcLinkHealth}, " +
-                $"Power Stage={health.PowerStageHealth}, Thermal={health.ThermalStress}\n" +
-                $"Root Cause: {events.RootCause} (Confidence={events.Confidence})\n" +
+                $"Health Scores: Battery={health.BatteryHealth}, DC Link={health.DcLinkHealth}, " +
+                $"Power Stage={health.PowerStageHealth}, Thermal Stress={health.ThermalStress}\n" +
+                $"DC={signal.DcStability}, Battery={signal.BatteryBehavior}, Freq={signal.FrequencyStability}\n" +
+                $"Root Cause: {events.RootCause} (Confidence: {events.Confidence})\n" +
                 $"Patterns: {patterns}\n" +
                 $"Observations: {obs}\n\n" +
-                $"=== ALARM LOG ===\n{alarmContext}";
+                $"{alarmContext}";
 
             string json = await _ai.CallAsync(SystemPrompt, user);
             return JsonSerializer.Deserialize<InsightResult>(json, _opts)
