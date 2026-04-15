@@ -40,6 +40,10 @@ namespace UpsMaintenanceApp.Views
                 TxtAssetId.Text       = s.AssetId;
                 TxtUpsModel.Text      = s.UpsModel;
                 CboModel.SelectedIndex = s.Model switch { "gpt-4o-mini" => 1, "gpt-4-turbo" => 2, _ => 0 };
+
+                // Apply saved API key to environment so pipeline works on every launch
+                if (!string.IsNullOrWhiteSpace(s.ApiKey))
+                    Environment.SetEnvironmentVariable("OPENAI_API_KEY", s.ApiKey);
             }
             catch { }
         }

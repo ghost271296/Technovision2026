@@ -19,8 +19,23 @@ namespace UpsMaintenanceApp.Services
     {
         private static readonly string[] DateFormats =
         {
+            // Primary: "20 January 2026 06:50:04:730 AM"  (colon before ms)
             "d MMMM yyyy hh:mm:ss:fff tt",
             "d MMMM yyyy h:mm:ss:fff tt",
+            // Fallback: dot before ms
+            "d MMMM yyyy hh:mm:ss.fff tt",
+            "d MMMM yyyy h:mm:ss.fff tt",
+            // Without milliseconds
+            "d MMMM yyyy hh:mm:ss tt",
+            "d MMMM yyyy h:mm:ss tt",
+            // 24-hour with ms
+            "d MMMM yyyy HH:mm:ss:fff",
+            "d MMMM yyyy HH:mm:ss.fff",
+            "d MMMM yyyy HH:mm:ss",
+            // Common alternatives
+            "yyyy-MM-dd HH:mm:ss",
+            "dd/MM/yyyy HH:mm:ss",
+            "MM/dd/yyyy hh:mm:ss tt",
         };
 
         private static DateTime ParseDate(string raw)
@@ -28,9 +43,13 @@ namespace UpsMaintenanceApp.Services
             if (string.IsNullOrWhiteSpace(raw)) return DateTime.MinValue;
             // Collapse multiple spaces (the format uses 3 spaces between date and time)
             string s = Regex.Replace(raw.Trim(), @"\s+", " ");
-            return DateTime.TryParseExact(s, DateFormats,
-                       CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt)
-                   ? dt : DateTime.MinValue;
+            if (DateTime.TryParseExact(s, DateFormats,
+                    CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
+                return dt;
+            // Last-resort: let .NET guess
+            if (DateTime.TryParse(s, CultureInfo.InvariantCulture, DateTimeStyles.None, out dt))
+                return dt;
+            return DateTime.MinValue;
         }
 
         private static char DetectSep(string header) =>
@@ -69,12 +88,14 @@ namespace UpsMaintenanceApp.Services
             if (!File.Exists(filePath)) return rows;
 
             string[] lines = File.ReadAllLines(filePath);
-            if (lines.Length < 3) return rows;   // header + metadata + ≥1 row
+            if (lines.Length < 2) return rows;
 
             char sep = DetectSep(lines[0]);
             var  h   = HeaderMap(lines[0], sep);
 
-            for (int i = 2; i < lines.Length; i++)
+            // Start from row 1; non-data rows (metadata "Data/Alarm Log has created on…",
+            // blank lines) are rejected automatically because their timestamp won't parse.
+            for (int i = 1; i < lines.Length; i++)
             {
                 if (string.IsNullOrWhiteSpace(lines[i])) continue;
                 var cols = lines[i].Split(sep);
@@ -123,12 +144,13 @@ namespace UpsMaintenanceApp.Services
             if (!File.Exists(filePath)) return list;
 
             string[] lines = File.ReadAllLines(filePath);
-            if (lines.Length < 3) return list;
+            if (lines.Length < 2) return list;
 
             char sep = DetectSep(lines[0]);
             var  h   = HeaderMap(lines[0], sep);
 
-            for (int i = 2; i < lines.Length; i++)
+            // Start from row 1; rows with unparseable timestamps are removed below.
+            for (int i = 1; i < lines.Length; i++)
             {
                 if (string.IsNullOrWhiteSpace(lines[i])) continue;
                 var cols = lines[i].Split(sep);
