@@ -21,7 +21,7 @@
 				<Button x:Name="NavReport"    Content="📄  Report"        Tag="Report"    Click="Nav_Click" Style="{StaticResource NavButton}"/>
 				<Button x:Name="NavSettings"  Content="⚙   Settings"      Tag="Settings"  Click="Nav_Click" Style="{StaticResource NavButton}"/>
 				<Separator Margin="0,16"/>
-				<Button x:Name="BtnLoadFile" Content="📂  Load DataLog"
+				 <Button x:Name="BtnLoadFile" Content="📂  Load Files"
                         Click="BtnLoadFile_Click"
                         Padding="10,7" Background="#2563EB" Foreground="White"
                         BorderBrush="Transparent"/>
@@ -386,9 +386,9 @@
 				</StackPanel>
 			</ScrollViewer>
 			<!-- Navigation pages -->
-			<views:UploadVisitPage x:Name="PageUpload"   Visibility="Collapsed"/>
-			<views:ReportPage      x:Name="PageReport"   Visibility="Collapsed"/>
-			<views:SettingsPage    x:Name="PageSettings" Visibility="Collapsed"/>
+            <views:UploadVisitPage x:Name="PageUpload"   Grid.Row="1" Visibility="Collapsed"/>
+            <views:ReportPage      x:Name="PageReport"   Grid.Row="1" Visibility="Collapsed"/>
+            <views:SettingsPage    x:Name="PageSettings" Grid.Row="1" Visibility="Collapsed"/>
 
 		</Grid>
 	</Grid>

@@ -11,15 +11,18 @@ namespace UpsMaintenanceApp.Services
 
         public static double VinAvg(IList<TelemetryRow> rows)
         {
-            if (rows.Count == 0) return 0.0;
-            return rows.Average(r =>
+            // Filter to rows where mains input is actually connected (> 10 V)
+            var live = rows.Where(r => r.InputVoltageL1 > 10).ToList();
+            if (live.Count == 0) return 0.0;
+            return live.Average(r =>
                 (r.InputVoltageL1 + r.InputVoltageL2 + r.InputVoltageL3) / 3.0);
         }
 
         public static double VinUnbalancePu(IList<TelemetryRow> rows)
         {
-            if (rows.Count == 0) return 0.0;
-            return rows.Average(r =>
+            var live = rows.Where(r => r.InputVoltageL1 > 10).ToList();
+            if (live.Count == 0) return 0.0;
+            return live.Average(r =>
             {
                 double mean = (r.InputVoltageL1 + r.InputVoltageL2 + r.InputVoltageL3) / 3.0;
                 if (Math.Abs(mean) < Epsilon) return 0.0;
@@ -28,6 +31,16 @@ namespace UpsMaintenanceApp.Services
                                          Math.Abs(r.InputVoltageL3 - mean)));
                 return maxDev / mean;
             });
+        }
+
+        public static double FoutStd(IList<TelemetryRow> rows)
+        {
+            // Only consider rows where UPS is actively outputting (freq > 0)
+            var active = rows.Where(r => r.OutputFrequency > 0).ToList();
+            if (active.Count < 2) return 0.0;
+            double mean  = active.Average(r => r.OutputFrequency);
+            double sumSq = active.Sum(r => Math.Pow(r.OutputFrequency - mean, 2));
+            return Math.Sqrt(sumSq / (active.Count - 1));
         }
 
         public static double VdcMean(IList<TelemetryRow> rows)
@@ -71,6 +84,7 @@ namespace UpsMaintenanceApp.Services
                 ["VdcMean"]          = VdcMean(rows),
                 ["VdcStd"]           = VdcStd(rows),
                 ["RbattProxy"]       = RbattProxy(rows),
+                ["FoutStd"]          = FoutStd(rows),
                 ["AlarmRatePerHour"] = AlarmRatePerHour(alarms)
             };
         }
