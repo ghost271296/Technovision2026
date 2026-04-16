@@ -9,45 +9,33 @@ namespace UpsMaintenanceApp.Services
     {
         private const double Epsilon = 1e-9;
 
-        // ── Input ─────────────────────────────────────────────────────────────
+        // ── Input / bypass ────────────────────────────────────────────────────
 
+        /// <summary>Average bypass voltage while mains is present (BypassVoltage > 10 V).</summary>
         public static double VinAvg(IList<TelemetryRow> rows)
         {
-            var live = rows.Where(r => r.InputVoltageL1 > 10).ToList();
+            var live = rows.Where(r => r.IsMainsPresent).ToList();
             if (live.Count == 0) return 0.0;
-            return live.Average(r =>
-                (r.InputVoltageL1 + r.InputVoltageL2 + r.InputVoltageL3) / 3.0);
+            return live.Average(r => r.BypassVoltage);
         }
 
-        public static double VinUnbalancePu(IList<TelemetryRow> rows)
-        {
-            var live = rows.Where(r => r.InputVoltageL1 > 10).ToList();
-            if (live.Count == 0) return 0.0;
-            return live.Average(r =>
-            {
-                double mean = (r.InputVoltageL1 + r.InputVoltageL2 + r.InputVoltageL3) / 3.0;
-                if (Math.Abs(mean) < Epsilon) return 0.0;
-                double maxDev = Math.Max(Math.Abs(r.InputVoltageL1 - mean),
-                                Math.Max(Math.Abs(r.InputVoltageL2 - mean),
-                                         Math.Abs(r.InputVoltageL3 - mean)));
-                return maxDev / mean;
-            });
-        }
+        /// <summary>Not applicable without 3-phase input — returns 0.</summary>
+        public static double VinUnbalancePu(IList<TelemetryRow> rows) => 0.0;
 
         // ── DC bus ────────────────────────────────────────────────────────────
 
-        /// <summary>VdcMean computed only while input supply is ON (InputVoltageL1 > 10 V).</summary>
+        /// <summary>VdcMean computed only while the DC bus is energised (IsOnline).</summary>
         public static double VdcMean(IList<TelemetryRow> rows)
         {
-            var online = rows.Where(r => r.InputVoltageL1 > 10).ToList();
+            var online = rows.Where(r => r.IsOnline).ToList();
             if (online.Count == 0) return 0.0;
             return online.Average(r => r.DcBusVoltage);
         }
 
-        /// <summary>VdcStd computed only while input supply is ON.</summary>
+        /// <summary>VdcStd computed only while the DC bus is energised.</summary>
         public static double VdcStd(IList<TelemetryRow> rows)
         {
-            var online = rows.Where(r => r.InputVoltageL1 > 10).ToList();
+            var online = rows.Where(r => r.IsOnline).ToList();
             if (online.Count < 2) return 0.0;
             double mean  = online.Average(r => r.DcBusVoltage);
             double sumSq = online.Sum(r => Math.Pow(r.DcBusVoltage - mean, 2));
@@ -66,30 +54,53 @@ namespace UpsMaintenanceApp.Services
 
         // ── Output ────────────────────────────────────────────────────────────
 
-        /// <summary>Output frequency std dev — only rows where inverter is actively outputting.</summary>
+        /// <summary>Output frequency std dev — only when inverter is actively outputting.</summary>
         public static double FoutStd(IList<TelemetryRow> rows)
         {
-            var active = rows.Where(r => r.OutputFrequency > 0).ToList();
+            var active = rows.Where(r => r.IsInverterActive).ToList();
             if (active.Count < 2) return 0.0;
             double mean  = active.Average(r => r.OutputFrequency);
             double sumSq = active.Sum(r => Math.Pow(r.OutputFrequency - mean, 2));
             return Math.Sqrt(sumSq / (active.Count - 1));
         }
 
+        /// <summary>Average output voltage while inverter is running.</summary>
+        public static double VoutMean(IList<TelemetryRow> rows)
+        {
+            var active = rows.Where(r => r.IsInverterActive).ToList();
+            if (active.Count == 0) return 0.0;
+            return active.Average(r => r.OutputVoltageL1);
+        }
+
+        /// <summary>Average output power (kW) while inverter is running.</summary>
+        public static double PowerMean(IList<TelemetryRow> rows)
+        {
+            var active = rows.Where(r => r.IsInverterActive).ToList();
+            if (active.Count == 0) return 0.0;
+            return active.Average(r => r.OutputPowerKw);
+        }
+
         // ── Operational state ─────────────────────────────────────────────────
 
-        /// <summary>Percentage of log time where mains input supply is present (InputVoltageL1 > 10 V).</summary>
+        /// <summary>Percentage of log time where DC bus is energised (UPS online).</summary>
         public static double UpsOnlinePct(IList<TelemetryRow> rows)
         {
             if (rows.Count == 0) return 0.0;
-            return rows.Count(r => r.InputVoltageL1 > 10) * 100.0 / rows.Count;
+            return rows.Count(r => r.IsOnline) * 100.0 / rows.Count;
         }
 
-        /// <summary>Percentage of log time where UPS inverter is actively outputting (OutputFrequency > 0).</summary>
+        /// <summary>Percentage of log time where inverter is actively outputting.</summary>
         public static double InverterActivePct(IList<TelemetryRow> rows)
         {
             if (rows.Count == 0) return 0.0;
-            return rows.Count(r => r.OutputFrequency > 0) * 100.0 / rows.Count;
+            return rows.Count(r => r.IsInverterActive) * 100.0 / rows.Count;
+        }
+
+        /// <summary>Percentage of log time where bypass/mains is present.</summary>
+        public static double MainsPresentPct(IList<TelemetryRow> rows)
+        {
+            if (rows.Count == 0) return 0.0;
+            return rows.Count(r => r.IsMainsPresent) * 100.0 / rows.Count;
         }
 
         // ── Alarms ────────────────────────────────────────────────────────────
@@ -116,10 +127,13 @@ namespace UpsMaintenanceApp.Services
                 ["VdcStd"]            = VdcStd(rows),
                 ["RbattProxy"]        = RbattProxy(rows),
                 ["FoutStd"]           = FoutStd(rows),
+                ["VoutMean"]          = VoutMean(rows),
+                ["PowerMean"]         = PowerMean(rows),
                 ["AlarmRatePerHour"]  = AlarmRatePerHour(alarms),
                 ["UpsOnlinePct"]      = UpsOnlinePct(rows),
                 ["InverterActivePct"] = InverterActivePct(rows),
-                ["ActiveAlarmCount"]  = alarms.Count(a => a.IsActive),
+                ["MainsPresentPct"]   = MainsPresentPct(rows),
+                ["ActiveAlarmCount"]  = alarms.Count(a =>  a.IsActive),
                 ["ClearedAlarmCount"] = alarms.Count(a => !a.IsActive),
             };
         }

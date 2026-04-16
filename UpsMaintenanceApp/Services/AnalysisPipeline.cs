@@ -31,27 +31,36 @@ namespace UpsMaintenanceApp.Services
         {
             features.TryGetValue("UpsOnlinePct",      out double onlinePct);
             features.TryGetValue("InverterActivePct", out double invPct);
+            features.TryGetValue("MainsPresentPct",   out double mainsPct);
             features.TryGetValue("ActiveAlarmCount",  out double activeAlarms);
             features.TryGetValue("ClearedAlarmCount", out double clearedAlarms);
+            features.TryGetValue("VoutMean",          out double voutMean);
+            features.TryGetValue("PowerMean",         out double powerMean);
 
             var sb = new StringBuilder();
             sb.AppendLine("=== UPS OPERATIONAL STATE ===");
-            sb.AppendLine($"Input supply present (online): {onlinePct:F0}% of log duration");
-            sb.AppendLine($"Inverter actively outputting : {invPct:F0}% of log duration");
-            sb.AppendLine($"Active alarms (no X- prefix) : {(int)activeAlarms}");
+            sb.AppendLine($"DC bus energised (UPS online)  : {onlinePct:F0}% of log duration");
+            sb.AppendLine($"Inverter actively outputting   : {invPct:F0}% of log duration");
+            sb.AppendLine($"Bypass/mains supply present    : {mainsPct:F0}% of log duration");
+            sb.AppendLine($"Average output voltage (Vout)  : {voutMean:F1} V  (when inverter active)");
+            sb.AppendLine($"Average output power           : {powerMean:F2} kW (when inverter active)");
+            sb.AppendLine($"Active alarms (no X- prefix)   : {(int)activeAlarms}");
             sb.AppendLine($"Cleared/deactivated (X- prefix): {(int)clearedAlarms}");
             sb.AppendLine();
             sb.AppendLine("=== CRITICAL ANALYSIS RULES ===");
-            sb.AppendLine("1. ONLY flag faults/concerns that occur during NORMAL OPERATION");
-            sb.AppendLine("   (input supply present, inverter running).");
-            sb.AppendLine("2. Do NOT treat intentional shutdown or bypass as a fault:");
-            sb.AppendLine("   - 'X - Inverter_ON'          → inverter was COMMANDED OFF intentionally");
-            sb.AppendLine("   - 'X - Load_ON_Inverter'     → load deliberately removed from inverter");
-            sb.AppendLine("   - 'X - Bypass_ON'            → bypass mode ended (not a fault)");
+            sb.AppendLine("1. ONLY flag faults/concerns during NORMAL OPERATION (DC bus energised, inverter running).");
+            sb.AppendLine("2. MCCB = Molded Case Circuit Breaker (manual breaker operated by engineer):");
+            sb.AppendLine("   - 'Input_MCCB_OFF' or any '*_MCCB_OFF' = engineer INTENTIONALLY opened the breaker. NOT A FAULT.");
+            sb.AppendLine("   - 'X - Rectifier_ON' following an MCCB_OFF = rectifier stopped because input breaker opened. NOT A FAULT.");
+            sb.AppendLine("   - ANY alarm containing 'MCCB' is a deliberate maintenance/switching action. IGNORE as fault.");
             sb.AppendLine("3. Alarm prefix rules:");
-            sb.AppendLine("   - No prefix  = alarm/status is CURRENTLY ACTIVE (e.g. Inverter_Fail = failed now)");
-            sb.AppendLine("   - 'X - ' prefix = that alarm/status was DEACTIVATED/REMOVED");
-            sb.AppendLine("4. If UPS online% is low, consider planned maintenance/shutdown as context.");
+            sb.AppendLine("   - No prefix   = alarm/status is ACTIVE  (e.g. 'Inverter_Fail' = inverter currently failed)");
+            sb.AppendLine("   - 'X - ' prefix = alarm/status DEACTIVATED (e.g. 'X - Inverter_ON' = inverter commanded OFF intentionally)");
+            sb.AppendLine("4. Other intentional actions — do NOT flag as faults:");
+            sb.AppendLine("   - 'X - Load_ON_Inverter' = load deliberately moved off inverter");
+            sb.AppendLine("   - 'X - Bypass_ON'        = bypass mode ended normally");
+            sb.AppendLine("   - 'X - Rectifier_ON'     = rectifier deactivated (check if MCCB_OFF preceded it)");
+            sb.AppendLine("5. If UPS online% is low, attribute to planned maintenance — not failure.");
             return sb.ToString();
         }
 

@@ -280,6 +280,14 @@ namespace UpsMaintenanceApp
                 },
                 new LineSeries<double>
                 {
+                    Name         = "Vout (V)",
+                    Values       = sample.Select(r => r.OutputVoltageL1).ToArray(),
+                    Stroke       = new SolidColorPaint(SKColors.ForestGreen, 2),
+                    Fill         = null,
+                    GeometrySize = 0
+                },
+                new LineSeries<double>
+                {
                     Name         = "Freq Out (Hz)",
                     Values       = sample.Select(r => r.OutputFrequency).ToArray(),
                     Stroke       = new SolidColorPaint(SKColors.OrangeRed, 2),

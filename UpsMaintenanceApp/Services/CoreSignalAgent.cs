@@ -45,18 +45,20 @@ namespace UpsMaintenanceApp.Services
             features.TryGetValue("AlarmRatePerHour", out double alarmRate);
             features.TryGetValue("FoutStd",          out double foutStd);
             features.TryGetValue("VinAvg",           out double vinAvg);
-            features.TryGetValue("VinUnbalancePu",   out double vinUnbal);
+            features.TryGetValue("VoutMean",         out double voutMean);
+            features.TryGetValue("PowerMean",        out double powerMean);
 
             string user =
                 $"{operationalContext}\n" +
                 $"=== TELEMETRY METRICS (computed during online periods only) ===\n" +
-                $"DC Bus Voltage Mean  : {vdcMean:F2} V\n" +
-                $"DC Bus Voltage Std   : {vdcStd:F4} V\n" +
-                $"Battery Resistance Proxy: {rbatt:F4} Ω\n" +
-                $"Output Frequency Std : {foutStd:F4} Hz\n" +
-                $"Input Voltage Avg    : {vinAvg:F2} V\n" +
-                $"Input Unbalance      : {vinUnbal:F4} pu\n" +
-                $"Alarm Rate           : {alarmRate:F2} alarms/hr\n\n" +
+                $"DC Bus Voltage Mean      : {vdcMean:F2} V\n" +
+                $"DC Bus Voltage Std       : {vdcStd:F4} V\n" +
+                $"Battery Resistance Proxy : {rbatt:F4} Ω\n" +
+                $"Output Frequency Std     : {foutStd:F4} Hz\n" +
+                $"Bypass Voltage Avg       : {vinAvg:F2} V\n" +
+                $"Output Voltage Mean (Vout): {voutMean:F2} V\n" +
+                $"Output Power Mean        : {powerMean:F2} kW\n" +
+                $"Alarm Rate               : {alarmRate:F2} alarms/hr\n\n" +
                 $"{alarmContext}";
 
             string json = await _ai.CallAsync(SystemPrompt, user);

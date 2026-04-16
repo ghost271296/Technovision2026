@@ -109,27 +109,29 @@ namespace UpsMaintenanceApp.Services
                     var row = new TelemetryRow
                     {
                         Timestamp       = ParseDate(Str(cols, h, "Date Time")),
-                        // Input 3-phase
-                        InputVoltageL1  = Dbl(cols, h, "Vr Input (V)"),
-                        InputCurrentL1  = Dbl(cols, h, "Ir Input (A)"),
-                        InputVoltageL2  = Dbl(cols, h, "Vy Input (V)"),
-                        InputCurrentL2  = Dbl(cols, h, "Iy Input (A)"),
-                        InputVoltageL3  = Dbl(cols, h, "Vb Input (V)"),
-                        InputCurrentL3  = Dbl(cols, h, "Ib Input (A)"),
-                        // Mains/bypass frequency used as InputFrequency
-                        InputFrequency  = Dbl(cols, h, "Frequency Bypass"),
-                        // DC bus & battery
+                        // DC bus
                         DcBusVoltage    = Dbl(cols, h, "VdcLink"),
-                        BatteryVoltage  = Dbl(cols, h, "Vbatt"),
-                        BatteryCurrent  = Dbl(cols, h, "Ibatt"),
-                        // Output (single-phase measured at UPS output)
+                        DcLinkCurrent   = Dbl(cols, h, "IdcLink"),
+                        // Battery
+                        BatteryVoltage    = Dbl(cols, h, "Vbatt"),
+                        BatteryCurrent    = Dbl(cols, h, "Ibatt"),
+                        BatteryVoltagePos = Dbl(cols, h, "VBatt Pos"),
+                        BatteryVoltageNeg = Dbl(cols, h, "VBatt Neg"),
+                        // Bypass / mains
+                        BypassVoltage   = Dbl(cols, h, "Vbypass"),
+                        BypassCurrent   = Dbl(cols, h, "Ibypass"),
+                        BypassFrequency = Dbl(cols, h, "Frequency Bypass"),
+                        // Inverter
+                        InverterVoltage   = Dbl(cols, h, "Vinv"),
+                        InverterCurrent   = Dbl(cols, h, "Iout_UPS"),
+                        InverterFrequency = Dbl(cols, h, "Frequency Inv"),
+                        // Output (load side)
                         OutputVoltageL1 = Dbl(cols, h, "Vout"),
                         OutputCurrentL1 = Dbl(cols, h, "Iout"),
                         OutputFrequency = Dbl(cols, h, "Frequency Out"),
-                        // Inverter channel stored in L2/L3 spare slots
-                        OutputVoltageL2 = Dbl(cols, h, "Vinv"),
-                        OutputCurrentL2 = Dbl(cols, h, "Iout_UPS"),
-                        OutputVoltageL3 = Dbl(cols, h, "Frequency Inv")
+                        OutputPowerKw   = Dbl(cols, h, "P Out"),
+                        OutputPowerKva  = Dbl(cols, h, "KVA_output"),
+                        PowerFactor     = Dbl(cols, h, "PF_out"),
                     };
                     if (row.Timestamp == DateTime.MinValue) continue;
                     rows.Add(row);
@@ -195,10 +197,12 @@ namespace UpsMaintenanceApp.Services
         private static string InferCategory(string desc)
         {
             string d = desc.ToUpperInvariant();
+            // MCCB = manual breaker operation by engineer — intentional maintenance action
+            if (d.Contains("MCCB"))                                                    return "Maintenance";
             if (d.Contains("INVERTER") || d.Contains("INV_") || d.Contains("DSAT"))  return "Inverter";
             if (d.Contains("BATTERY")  || d.Contains("BATT"))                         return "Battery";
             if (d.Contains("BYPASS"))                                                  return "Bypass";
-            if (d.Contains("RECTIFIER") || d.Contains("RECT") || d.Contains("MCCB")) return "Rectifier";
+            if (d.Contains("RECTIFIER") || d.Contains("RECT"))                        return "Rectifier";
             if (d.Contains("OVERLOAD") || d.Contains("LOAD"))                         return "Load";
             if (d.Contains("THERMAL")  || d.Contains("TEMP") || d.Contains("FAN"))   return "Thermal";
             if (d.Contains("SYNC")     || d.Contains("COMM"))                         return "Communication";
