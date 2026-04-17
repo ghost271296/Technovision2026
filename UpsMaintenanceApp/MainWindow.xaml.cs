@@ -141,8 +141,9 @@ namespace UpsMaintenanceApp
             BuildElectricalChart(telemetry);
             BuildAlarmChart(alarms);
 
-            // ── Build alarm context for LLM ────────────────────────────────────
-            string alarmContext = BuildAlarmContext(alarms);
+            // ── Build contexts for LLM ─────────────────────────────────────────
+            string alarmContext    = BuildAlarmContext(alarms);
+            string timelineContext = AnalysisPipeline.BuildCombinedTimelineContext(telemetry, alarms);
 
             // ── AI Pipeline ────────────────────────────────────────────────────
             string apiKey = GetApiKey();
@@ -154,7 +155,7 @@ namespace UpsMaintenanceApp
             var progress = new Progress<string>(msg =>
                 Dispatcher.InvokeAsync(() => _vm.PipelineStatus = msg));
 
-            var result = await new AnalysisPipeline(apiKey, GetModel()).RunAsync(features, alarmContext, progress);
+            var result = await new AnalysisPipeline(apiKey, GetModel()).RunAsync(features, alarmContext, timelineContext, progress);
             _lastResult = result;
 
             // ── Populate ViewModel ─────────────────────────────────────────────

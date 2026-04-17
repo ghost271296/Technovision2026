@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using UpsMaintenanceApp.Models;
 
 namespace UpsMaintenanceApp.Services
 {
@@ -64,9 +66,112 @@ namespace UpsMaintenanceApp.Services
             return sb.ToString();
         }
 
+        /// <summary>
+        /// Merges DataLog telemetry and AlarmLog events into a single chronological timeline
+        /// capped at <paramref name="maxEntries"/> lines to stay within the LLM token budget.
+        /// Strategy: alarm-anchor windows (±2 min around each alarm) + uniform baseline samples.
+        /// </summary>
+        public static string BuildCombinedTimelineContext(
+            IList<TelemetryRow> rows,
+            IList<AlarmEvent>   alarms,
+            int                 maxEntries = 55)
+        {
+            if (rows.Count == 0 && alarms.Count == 0)
+                return "No telemetry or alarm data available for timeline.";
+
+            // ── 1. Collect alarm-anchor telemetry indices ─────────────────────
+            var selectedIndices = new HashSet<int>();
+
+            foreach (var alarm in alarms)
+            {
+                if (alarm.OccurredAt == DateTime.MinValue) continue;
+                var window = TimeSpan.FromSeconds(120);
+
+                // Binary-search approximate position then scan ±2 rows in the window
+                int nearest = BinarySearchNearest(rows, alarm.OccurredAt);
+                for (int delta = -10; delta <= 10; delta++)
+                {
+                    int idx = nearest + delta;
+                    if (idx < 0 || idx >= rows.Count) continue;
+                    if (Math.Abs((rows[idx].Timestamp - alarm.OccurredAt).TotalSeconds) <= window.TotalSeconds)
+                        selectedIndices.Add(idx);
+                }
+            }
+
+            // ── 2. Add uniform baseline samples ───────────────────────────────
+            int baselineCount = Math.Min(12, rows.Count);
+            if (baselineCount > 0)
+            {
+                double step = (rows.Count - 1.0) / baselineCount;
+                for (int b = 0; b <= baselineCount; b++)
+                    selectedIndices.Add((int)Math.Round(b * step));
+            }
+
+            // ── 3. Sort selected telemetry rows ───────────────────────────────
+            var selectedRows = selectedIndices
+                .Where(i => i >= 0 && i < rows.Count)
+                .Select(i => rows[i])
+                .OrderBy(r => r.Timestamp)
+                .ToList();
+
+            // ── 4. Build merged timeline entries ──────────────────────────────
+            // Each entry = (timestamp, text line)
+            var entries = new List<(DateTime ts, string line)>();
+
+            foreach (var r in selectedRows)
+            {
+                string line =
+                    $"[{r.Timestamp:dd-MMM HH:mm:ss}] " +
+                    $"Vdc={r.DcBusVoltage:F1}V  Vout={r.OutputVoltageL1:F1}V  " +
+                    $"Freq={r.OutputFrequency:F2}Hz  Vbatt={r.BatteryVoltage:F1}V  " +
+                    $"Iout={r.OutputCurrentL1:F1}A  Pout={r.OutputPowerKw:F2}kW";
+                entries.Add((r.Timestamp, line));
+            }
+
+            foreach (var a in alarms)
+            {
+                if (a.OccurredAt == DateTime.MinValue) continue;
+                string prefix = a.IsActive ? "*** ALARM" : "*** STATUS REMOVED";
+                string line =
+                    $"[{a.OccurredAt:dd-MMM HH:mm:ss}] {prefix}: {a.Description}  [{a.Category}]";
+                entries.Add((a.OccurredAt, line));
+            }
+
+            // ── 5. Sort, deduplicate adjacent identical lines, cap ────────────
+            var sorted = entries
+                .OrderBy(e => e.ts)
+                .Select(e => e.line)
+                .Distinct()
+                .Take(maxEntries)
+                .ToList();
+
+            var sb = new StringBuilder();
+            sb.AppendLine($"=== TIME-CORRELATED LOG ({sorted.Count} entries, alarm windows + baseline samples) ===");
+            sb.AppendLine("Format: [timestamp] telemetry snapshot  |  *** ALARM / *** STATUS REMOVED = alarm event");
+            sb.AppendLine();
+            foreach (var line in sorted)
+                sb.AppendLine(line);
+
+            return sb.ToString();
+        }
+
+        // Binary search for the row index whose timestamp is nearest to target
+        private static int BinarySearchNearest(IList<TelemetryRow> rows, DateTime target)
+        {
+            int lo = 0, hi = rows.Count - 1;
+            while (lo < hi)
+            {
+                int mid = (lo + hi) / 2;
+                if (rows[mid].Timestamp < target) lo = mid + 1;
+                else hi = mid;
+            }
+            return lo;
+        }
+
         public async Task<FinalResult> RunAsync(
             Dictionary<string, double> features,
             string alarmContext,
+            string timelineContext,
             IProgress<string>? progress = null)
         {
             var result = new FinalResult();
@@ -100,7 +205,7 @@ namespace UpsMaintenanceApp.Services
             progress?.Report("Running AI pipeline — Agent 3 / 5  (Event Correlation)…");
             try
             {
-                result.EventCorrelation = await _eventCorr.AnalyzeAsync(features, opContext, alarmContext);
+                result.EventCorrelation = await _eventCorr.AnalyzeAsync(features, opContext, timelineContext);
             }
             catch (Exception ex)
             {
@@ -128,7 +233,7 @@ namespace UpsMaintenanceApp.Services
             {
                 result.Insight = await _insight.AnalyzeAsync(
                     result.CoreSignal, result.Health, result.EventCorrelation,
-                    result.Prediction, opContext, alarmContext);
+                    result.Prediction, opContext, alarmContext, timelineContext);
             }
             catch (Exception ex)
             {
