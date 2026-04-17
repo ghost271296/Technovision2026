@@ -237,8 +237,9 @@ namespace UpsMaintenanceApp.Services
             }
             catch (Exception ex)
             {
-                result.Errors.Add($"[InsightAgent] {ex.Message}");
-                result.Insight = new InsightResult { Summary = "Analysis incomplete due to error." };
+                string brief = ex.Message.Length > 120 ? ex.Message.Substring(0, 120) + "…" : ex.Message;
+                result.Errors.Add($"[InsightAgent] {brief}");
+                result.Insight = new InsightResult { Summary = $"AI Insight error: {brief}" };
             }
 
             result.CompletedAt = DateTime.UtcNow;

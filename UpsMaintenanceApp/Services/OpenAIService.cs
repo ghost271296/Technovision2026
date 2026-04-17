@@ -10,8 +10,7 @@ namespace UpsMaintenanceApp.Services
     {
         private readonly ChatClient _client;
         private const int MaxRetries     = 3;
-        private const int TimeoutSeconds = 90;
-        private const int MaxTokens      = 2000;
+        private const int TimeoutSeconds = 150;
 
         /// <param name="apiKey">OpenAI API key.</param>
         /// <param name="model">Model ID. Defaults to gpt-4o which supports JSON mode.</param>
@@ -55,10 +54,19 @@ namespace UpsMaintenanceApp.Services
                 }
                 catch (Exception ex)
                 {
-                    // Auth errors are unrecoverable — fail immediately
-                    if (ex.Message.Contains("401") || ex.Message.Contains("403") ||
-                        ex.Message.Contains("400") || ex.Message.Contains("invalid_api_key"))
-                        throw;
+                    // Auth / config errors are unrecoverable — fail immediately without retry
+                    string msg = ex.Message;
+                    bool unrecoverable =
+                        msg.Contains("invalid_api_key", StringComparison.OrdinalIgnoreCase) ||
+                        msg.Contains("Incorrect API key",    StringComparison.OrdinalIgnoreCase) ||
+                        msg.Contains("401") ||
+                        msg.Contains("403") ||
+                        (msg.Contains("400") && (
+                            msg.Contains("invalid_model",           StringComparison.OrdinalIgnoreCase) ||
+                            msg.Contains("model_not_found",         StringComparison.OrdinalIgnoreCase) ||
+                            msg.Contains("context_length_exceeded", StringComparison.OrdinalIgnoreCase) ||
+                            msg.Contains("json_validate_failed",    StringComparison.OrdinalIgnoreCase)));
+                    if (unrecoverable) throw;
                     lastEx = ex;
                 }
 
