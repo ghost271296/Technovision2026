@@ -13,3 +13,4 @@
 *.resources
 *.lref
 *.targets
+.claude/settings.local.json
