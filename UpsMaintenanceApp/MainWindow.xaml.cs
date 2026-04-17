@@ -135,9 +135,24 @@ namespace UpsMaintenanceApp
             features.TryGetValue("VdcMean",          out double vdcMean);
             features.TryGetValue("VdcStd",           out double vdcStd);
             features.TryGetValue("AlarmRatePerHour", out double alarmRate);
+            features.TryGetValue("VinStd",           out double vinStd);
+            features.TryGetValue("EfficiencyMean",   out double effMean);
+            features.TryGetValue("BypassFreqStd",    out double bypFStd);
+            features.TryGetValue("BypassVoltageStd", out double bypVStd);
+            features.TryGetValue("BatteryBackupMin", out double battMin);
+            features.TryGetValue("VoutStd",          out double voutStd);
             _vm.VdcMean   = vdcMean;
             _vm.VdcStd    = vdcStd;
             _vm.AlarmRate = alarmRate;
+
+            // KPI strip — computed directly from telemetry, not LLM text
+            _vm.InputVoltageVariation  = vinStd  > 0.001 ? $"±{vinStd:F2} V"   : "N/A";
+            _vm.EfficiencyRating       = effMean > 0.1   ? $"{effMean:F1} %"   : "N/A";
+            _vm.BypassFreqVariation    = bypFStd > 0.0001 ? $"±{bypFStd:F4} Hz" : "N/A";
+            _vm.BypassVoltageVariation = bypVStd > 0.001 ? $"±{bypVStd:F2} V"  : "N/A";
+            _vm.DcLinkVariation        = vdcStd  > 0.001 ? $"±{vdcStd:F3} V"   : "N/A";
+            _vm.BatteryBackupStatus    = battMin > 0.1   ? $"{battMin:F0} min" : "Not Used";
+            _vm.OutputVoltageVariation = voutStd > 0.001 ? $"±{voutStd:F3} V"  : "N/A";
 
             BuildElectricalChart(telemetry);
             BuildAlarmChart(alarms);
@@ -160,15 +175,8 @@ namespace UpsMaintenanceApp
             _lastResult = result;
 
             // ── Populate ViewModel ─────────────────────────────────────────────
-            // CoreSignal — 7 domain-specific assessments
-            _vm.InputVoltageVariation  = result.CoreSignal.InputVoltageVariation;
-            _vm.EfficiencyRating       = result.CoreSignal.EfficiencyRating;
-            _vm.BypassFreqVariation    = result.CoreSignal.BypassFreqVariation;
-            _vm.BypassVoltageVariation = result.CoreSignal.BypassVoltageVariation;
-            _vm.DcLinkVariation        = result.CoreSignal.DcLinkVariation;
-            _vm.BatteryBackupStatus    = result.CoreSignal.BatteryBackupStatus;
-            _vm.OutputVoltageVariation = result.CoreSignal.OutputVoltageVariation;
-            _vm.StressLevel            = result.CoreSignal.StressLevel;
+            // CoreSignal — StressLevel from LLM; numeric KPIs already set from FeatureEngine above
+            _vm.StressLevel = result.CoreSignal.StressLevel;
             // Health
             _vm.BatteryHealth       = result.Health.BatteryHealth;
             _vm.DcLinkHealth        = result.Health.DcLinkHealth;

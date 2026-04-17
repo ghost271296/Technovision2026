@@ -64,7 +64,7 @@ namespace UpsMaintenanceApp.Services
                 $"Observations: {obs}\n\n" +
                 $"{timelineContext}";
 
-            string json = await _ai.CallAsync(SystemPrompt, user, maxTokens: 3000);
+            string json = await _ai.CallAsync(SystemPrompt, user);
             return JsonSerializer.Deserialize<InsightResult>(json, _opts)
                    ?? new InsightResult();
         }

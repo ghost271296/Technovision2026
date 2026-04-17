@@ -66,50 +66,50 @@
 					<UniformGrid Rows="2" Columns="4" Margin="0,0,0,10">
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Input Voltage" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding InputVoltageVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+								<TextBlock Text="Vin Std Dev (V)" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding InputVoltageVariation}" FontSize="14" FontWeight="SemiBold"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Efficiency" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding EfficiencyRating}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+								<TextBlock Text="Efficiency (%)" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding EfficiencyRating}" FontSize="14" FontWeight="SemiBold"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Bypass Frequency" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding BypassFreqVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+								<TextBlock Text="Bypass Freq σ (Hz)" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding BypassFreqVariation}" FontSize="14" FontWeight="SemiBold"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Bypass Voltage" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding BypassVoltageVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+								<TextBlock Text="Bypass Volt σ (V)" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding BypassVoltageVariation}" FontSize="14" FontWeight="SemiBold"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="DC Link" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding DcLinkVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+								<TextBlock Text="DC Link σ (V)" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding DcLinkVariation}" FontSize="14" FontWeight="SemiBold"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
 								<TextBlock Text="Battery Backup" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding BatteryBackupStatus}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+								<TextBlock Text="{Binding BatteryBackupStatus}" FontSize="14" FontWeight="SemiBold"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Output Voltage" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding OutputVoltageVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+								<TextBlock Text="Vout σ (V)" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding OutputVoltageVariation}" FontSize="14" FontWeight="SemiBold"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}" Margin="0">
 							<StackPanel>
-								<TextBlock Text="Stress Level" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding StressLevel}" FontSize="15" FontWeight="Bold" Foreground="#DC2626" TextWrapping="Wrap"/>
+								<TextBlock Text="Overall Stress" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding StressLevel}" FontSize="15" FontWeight="Bold" Foreground="#DC2626"/>
 							</StackPanel>
 						</Border>
 					</UniformGrid>
