@@ -106,9 +106,18 @@ namespace UpsMaintenanceApp.Services
                 var cols = lines[i].Split(sep);
                 try
                 {
+                    double bypFreq = Dbl(cols, h, "Frequency Bypass");
                     var row = new TelemetryRow
                     {
                         Timestamp       = ParseDate(Str(cols, h, "Date Time")),
+                        // 3-phase input (Vr/Vy/Vb Input; zero if columns absent)
+                        InputVoltageL1  = Dbl(cols, h, "Vr Input"),
+                        InputVoltageL2  = Dbl(cols, h, "Vy Input"),
+                        InputVoltageL3  = Dbl(cols, h, "Vb Input"),
+                        InputCurrentL1  = Dbl(cols, h, "Ir Input") > 0 ? Dbl(cols, h, "Ir Input") : Dbl(cols, h, "Ir"),
+                        InputCurrentL2  = Dbl(cols, h, "Iy Input") > 0 ? Dbl(cols, h, "Iy Input") : Dbl(cols, h, "Iy"),
+                        InputCurrentL3  = Dbl(cols, h, "Ib Input") > 0 ? Dbl(cols, h, "Ib Input") : Dbl(cols, h, "Ib"),
+                        InputFrequency  = bypFreq,      // bypass freq is the input freq proxy
                         // DC bus
                         DcBusVoltage    = Dbl(cols, h, "VdcLink"),
                         DcLinkCurrent   = Dbl(cols, h, "IdcLink"),
@@ -120,14 +129,7 @@ namespace UpsMaintenanceApp.Services
                         // Bypass / mains
                         BypassVoltage   = Dbl(cols, h, "Vbypass"),
                         BypassCurrent   = Dbl(cols, h, "Ibypass"),
-                        BypassFrequency = Dbl(cols, h, "Frequency Bypass"),
-                        // 3-phase input (optional — zero if not in file)
-                        InputVoltageR = Dbl(cols, h, "Vr Input"),
-                        InputVoltageY = Dbl(cols, h, "Vy Input"),
-                        InputVoltageB = Dbl(cols, h, "Vb Input"),
-                        InputCurrentR = Dbl(cols, h, "Ir Input") > 0 ? Dbl(cols, h, "Ir Input") : Dbl(cols, h, "Ir"),
-                        InputCurrentY = Dbl(cols, h, "Iy Input") > 0 ? Dbl(cols, h, "Iy Input") : Dbl(cols, h, "Iy"),
-                        InputCurrentB = Dbl(cols, h, "Ib Input") > 0 ? Dbl(cols, h, "Ib Input") : Dbl(cols, h, "Ib"),
+                        BypassFrequency = bypFreq,
                         // Inverter
                         InverterVoltage   = Dbl(cols, h, "Vinv"),
                         InverterCurrent   = Dbl(cols, h, "Iout_UPS"),

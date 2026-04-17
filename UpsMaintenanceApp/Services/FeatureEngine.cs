@@ -13,19 +13,19 @@ namespace UpsMaintenanceApp.Services
 
         public static double VinAvg(IList<TelemetryRow> rows)
         {
-            var live = rows.Where(r => r.IsMainsPresent).ToList();
+            var live = rows.Where(r => r.IsInputPresent).ToList();
             if (live.Count == 0) return 0.0;
             return live.Any(r => r.Has3PhaseInput)
-                ? live.Where(r => r.Has3PhaseInput).Average(r => (r.InputVoltageR + r.InputVoltageY + r.InputVoltageB) / 3.0)
+                ? live.Where(r => r.Has3PhaseInput).Average(r => (r.InputVoltageL1 + r.InputVoltageL2 + r.InputVoltageL3) / 3.0)
                 : live.Average(r => r.BypassVoltage);
         }
 
         public static double VinStd(IList<TelemetryRow> rows)
         {
-            var live = rows.Where(r => r.IsMainsPresent).ToList();
+            var live = rows.Where(r => r.IsInputPresent).ToList();
             if (live.Count < 2) return 0.0;
             IList<double> vals = live.Any(r => r.Has3PhaseInput)
-                ? live.Where(r => r.Has3PhaseInput).Select(r => r.InputVoltageR).ToList()
+                ? live.Where(r => r.Has3PhaseInput).Select(r => r.InputVoltageL1).ToList()
                 : live.Select(r => r.BypassVoltage).ToList();
             double mean  = vals.Average();
             double sumSq = vals.Sum(v => Math.Pow(v - mean, 2));
@@ -36,9 +36,9 @@ namespace UpsMaintenanceApp.Services
         {
             var ph = rows.Where(r => r.Has3PhaseInput).ToList();
             if (ph.Count == 0) return 0.0;
-            double vr = ph.Average(r => r.InputVoltageR);
-            double vy = ph.Average(r => r.InputVoltageY);
-            double vb = ph.Average(r => r.InputVoltageB);
+            double vr = ph.Average(r => r.InputVoltageL1);
+            double vy = ph.Average(r => r.InputVoltageL2);
+            double vb = ph.Average(r => r.InputVoltageL3);
             double avg = (vr + vy + vb) / 3.0;
             if (avg < Epsilon) return 0.0;
             return new[] { Math.Abs(vr - avg), Math.Abs(vy - avg), Math.Abs(vb - avg) }.Max() / avg;
@@ -48,7 +48,7 @@ namespace UpsMaintenanceApp.Services
 
         public static double BypassVoltageStd(IList<TelemetryRow> rows)
         {
-            var live = rows.Where(r => r.IsMainsPresent).ToList();
+            var live = rows.Where(r => r.IsInputPresent).ToList();
             if (live.Count < 2) return 0.0;
             double mean  = live.Average(r => r.BypassVoltage);
             double sumSq = live.Sum(r => Math.Pow(r.BypassVoltage - mean, 2));
@@ -57,7 +57,7 @@ namespace UpsMaintenanceApp.Services
 
         public static double BypassFreqStd(IList<TelemetryRow> rows)
         {
-            var live = rows.Where(r => r.IsMainsPresent && r.BypassFrequency > 0).ToList();
+            var live = rows.Where(r => r.IsInputPresent && r.BypassFrequency > 0).ToList();
             if (live.Count < 2) return 0.0;
             double mean  = live.Average(r => r.BypassFrequency);
             double sumSq = live.Sum(r => Math.Pow(r.BypassFrequency - mean, 2));
@@ -68,18 +68,18 @@ namespace UpsMaintenanceApp.Services
 
         public static double VdcMean(IList<TelemetryRow> rows)
         {
-            var online = rows.Where(r => r.IsOnline).ToList();
-            if (online.Count == 0) return 0.0;
-            return online.Average(r => r.DcBusVoltage);
+            var on = rows.Where(r => r.IsRectifierOn).ToList();
+            if (on.Count == 0) return 0.0;
+            return on.Average(r => r.DcBusVoltage);
         }
 
         public static double VdcStd(IList<TelemetryRow> rows)
         {
-            var online = rows.Where(r => r.IsOnline).ToList();
-            if (online.Count < 2) return 0.0;
-            double mean  = online.Average(r => r.DcBusVoltage);
-            double sumSq = online.Sum(r => Math.Pow(r.DcBusVoltage - mean, 2));
-            return Math.Sqrt(sumSq / (online.Count - 1));
+            var on = rows.Where(r => r.IsRectifierOn).ToList();
+            if (on.Count < 2) return 0.0;
+            double mean  = on.Average(r => r.DcBusVoltage);
+            double sumSq = on.Sum(r => Math.Pow(r.DcBusVoltage - mean, 2));
+            return Math.Sqrt(sumSq / (on.Count - 1));
         }
 
         // ── Battery ───────────────────────────────────────────────────────────
@@ -117,7 +117,7 @@ namespace UpsMaintenanceApp.Services
 
         public static double FoutStd(IList<TelemetryRow> rows)
         {
-            var active = rows.Where(r => r.IsInverterActive).ToList();
+            var active = rows.Where(r => r.IsInverterOn).ToList();
             if (active.Count < 2) return 0.0;
             double mean  = active.Average(r => r.OutputFrequency);
             double sumSq = active.Sum(r => Math.Pow(r.OutputFrequency - mean, 2));
@@ -126,14 +126,14 @@ namespace UpsMaintenanceApp.Services
 
         public static double VoutMean(IList<TelemetryRow> rows)
         {
-            var active = rows.Where(r => r.IsInverterActive).ToList();
+            var active = rows.Where(r => r.IsInverterOn).ToList();
             if (active.Count == 0) return 0.0;
             return active.Average(r => r.OutputVoltageL1);
         }
 
         public static double VoutStd(IList<TelemetryRow> rows)
         {
-            var active = rows.Where(r => r.IsInverterActive).ToList();
+            var active = rows.Where(r => r.IsInverterOn).ToList();
             if (active.Count < 2) return 0.0;
             double mean  = active.Average(r => r.OutputVoltageL1);
             double sumSq = active.Sum(r => Math.Pow(r.OutputVoltageL1 - mean, 2));
@@ -142,7 +142,7 @@ namespace UpsMaintenanceApp.Services
 
         public static double PowerMean(IList<TelemetryRow> rows)
         {
-            var active = rows.Where(r => r.IsInverterActive).ToList();
+            var active = rows.Where(r => r.IsInverterOn).ToList();
             if (active.Count == 0) return 0.0;
             return active.Average(r => r.OutputPowerKw);
         }
@@ -154,7 +154,7 @@ namespace UpsMaintenanceApp.Services
             var valid = rows.Where(r =>
             {
                 double inputPw = r.Has3PhaseInput
-                    ? (r.InputVoltageR * r.InputCurrentR + r.InputVoltageY * r.InputCurrentY + r.InputVoltageB * r.InputCurrentB) / 1000.0
+                    ? (r.InputVoltageL1 * r.InputCurrentL1 + r.InputVoltageL2 * r.InputCurrentL2 + r.InputVoltageL3 * r.InputCurrentL3) / 1000.0
                     : r.BypassVoltage * r.BypassCurrent / 1000.0;
                 return r.OutputPowerKw > 0.01 && inputPw > 0.01;
             }).ToList();
@@ -162,7 +162,7 @@ namespace UpsMaintenanceApp.Services
             return valid.Average(r =>
             {
                 double inputPw = r.Has3PhaseInput
-                    ? (r.InputVoltageR * r.InputCurrentR + r.InputVoltageY * r.InputCurrentY + r.InputVoltageB * r.InputCurrentB) / 1000.0
+                    ? (r.InputVoltageL1 * r.InputCurrentL1 + r.InputVoltageL2 * r.InputCurrentL2 + r.InputVoltageL3 * r.InputCurrentL3) / 1000.0
                     : r.BypassVoltage * r.BypassCurrent / 1000.0;
                 return Math.Min(100.0, r.OutputPowerKw / inputPw * 100.0);
             });
@@ -173,19 +173,19 @@ namespace UpsMaintenanceApp.Services
         public static double UpsOnlinePct(IList<TelemetryRow> rows)
         {
             if (rows.Count == 0) return 0.0;
-            return rows.Count(r => r.IsOnline) * 100.0 / rows.Count;
+            return rows.Count(r => r.IsRectifierOn) * 100.0 / rows.Count;
         }
 
         public static double InverterActivePct(IList<TelemetryRow> rows)
         {
             if (rows.Count == 0) return 0.0;
-            return rows.Count(r => r.IsInverterActive) * 100.0 / rows.Count;
+            return rows.Count(r => r.IsInverterOn) * 100.0 / rows.Count;
         }
 
         public static double MainsPresentPct(IList<TelemetryRow> rows)
         {
             if (rows.Count == 0) return 0.0;
-            return rows.Count(r => r.IsMainsPresent) * 100.0 / rows.Count;
+            return rows.Count(r => r.IsInputPresent) * 100.0 / rows.Count;
         }
 
         // ── Alarms ────────────────────────────────────────────────────────────

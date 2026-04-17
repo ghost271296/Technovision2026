@@ -113,6 +113,10 @@ namespace UpsMaintenanceApp
             var telemetry = CsvParser.ParseTelemetry(dataPath);
             var alarms    = CsvParser.ParseAlarms(alarmPath);
 
+            // Stamp each telemetry row with alarm-driven operational state flags
+            // (IsRectifierOn, IsInverterOn, IsInputPresent, etc.) before feature compute.
+            AlarmStateTimeline.Enrich(telemetry, alarms);
+
             if (telemetry.Count == 0)
                 throw new InvalidOperationException(
                     "No telemetry rows parsed. Check the DataLog file has a 'Date Time' column " +
