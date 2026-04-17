@@ -151,26 +151,38 @@ namespace UpsMaintenanceApp.Services
 
         public static double EfficiencyMean(IList<TelemetryRow> rows)
         {
-            var valid = rows.Where(r =>
+            // Only compute when inverter is actively supplying a real load:
+            // inverter on + nominal output voltage + meaningful current draw.
+            var loaded = rows.Where(r =>
+                r.IsInverterOn &&
+                r.OutputVoltageL1 > 180.0 &&
+                r.OutputCurrentL1 > 1.0).ToList();
+
+            var valid = loaded.Where(r =>
+            {
+                double inPw = InputPower(r);
+                return inPw > 0.01;
+            }).ToList();
+
+            if (valid.Count == 0) return 0.0;
+
+            return valid.Average(r =>
             {
                 double outPw = OutputPower(r);
                 double inPw  = InputPower(r);
-                return outPw > 0.01 && inPw > 0.01;
-            }).ToList();
-            if (valid.Count == 0) return 0.0;
-            return valid.Average(r => Math.Min(100.0, OutputPower(r) / InputPower(r) * 100.0));
+                return Math.Min(100.0, outPw / inPw * 100.0);
+            });
         }
 
         private static double OutputPower(TelemetryRow r)
         {
             if (r.OutputPowerKw > 0.01) return r.OutputPowerKw;
-            // Fallback: apparent power from Vout × Iout
             return r.OutputVoltageL1 * r.OutputCurrentL1 / 1000.0;
         }
 
         private static double InputPower(TelemetryRow r)
         {
-            // 1. 3-phase: Vr×Ir + Vy×Iy + Vb×Ib
+            // 1. 3-phase AC input: Vr×Ir + Vy×Iy + Vb×Ib
             if (r.Has3PhaseInput && r.InputCurrentL1 > 0)
                 return (r.InputVoltageL1 * r.InputCurrentL1 +
                         r.InputVoltageL2 * r.InputCurrentL2 +
@@ -178,9 +190,7 @@ namespace UpsMaintenanceApp.Services
             // 2. Single-phase bypass: Vbypass × Ibypass
             if (r.BypassVoltage > 0 && r.BypassCurrent > 0)
                 return r.BypassVoltage * r.BypassCurrent / 1000.0;
-            // 3. DC-link proxy: VdcLink × IdcLink (rectifier DC output ≈ input power)
-            if (r.DcBusVoltage > 100 && r.DcLinkCurrent > 0)
-                return r.DcBusVoltage * r.DcLinkCurrent / 1000.0;
+            // No reliable AC input data — cannot compute efficiency
             return 0.0;
         }
 
