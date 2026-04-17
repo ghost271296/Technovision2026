@@ -123,10 +123,10 @@ namespace UpsMaintenanceApp
                     "and semicolon/tab/comma-separated values.");
 
             AlarmGrid.ItemsSource = alarms;
-            _vm.TotalAlarms       = alarms.Count;
-            _vm.AlarmStorms       = CountStorms(alarms);
-            _vm.DataQualityInfo   = $"Duration: {GetDuration(telemetry)}  |  Rows: {telemetry.Count:N0}";
-            _vm.LogWindowInfo     = $"Log: {GetLogWindow(telemetry)}";
+            _vm.TotalAlarms     = alarms.Count;
+            _vm.AlarmStorms     = CountStorms(alarms);
+            _vm.DataQualityInfo = $"Duration: {GetDuration(telemetry)}  |  Rows: {telemetry.Count:N0}";
+            _vm.LogWindowInfo   = $"Log: {GetLogWindow(telemetry)}";
 
             // ── Features ───────────────────────────────────────────────────────
             _vm.PipelineStatus = "Computing features…";
@@ -138,9 +138,6 @@ namespace UpsMaintenanceApp
             _vm.VdcMean   = vdcMean;
             _vm.VdcStd    = vdcStd;
             _vm.AlarmRate = alarmRate;
-            var outputRows = telemetry.Where(r => r.OutputFrequency > 0).ToList();
-            _vm.FreqError  = outputRows.Count > 0
-                ? outputRows.Average(r => Math.Abs(r.OutputFrequency - 50.0)) : 0;
 
             BuildElectricalChart(telemetry);
             BuildAlarmChart(alarms);

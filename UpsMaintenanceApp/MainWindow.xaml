@@ -62,69 +62,64 @@
 			<ScrollViewer x:Name="PageDashboard" Grid.Row="1" VerticalScrollBarVisibility="Auto" Background="#F6F7FB">
 				<StackPanel Margin="12">
 
-					<!-- ── KPI STRIP ── -->
-					<UniformGrid Rows="1" Columns="6" Margin="0,0,0,10">
+					<!-- ── SIGNAL ANALYSIS KPI STRIP ── -->
+					<UniformGrid Rows="2" Columns="4" Margin="0,0,0,10">
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Overall HI" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding OverallHealthIndex}" FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B"/>
+								<TextBlock Text="Input Voltage" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding InputVoltageVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Alarm Rate" Style="{StaticResource SmallLabel}"/>
-								<TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#DC2626">
-                                    <Run Text="{Binding AlarmRate, StringFormat=F0}"/><Run Text="/h"/>
-								</TextBlock>
+								<TextBlock Text="Efficiency" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding EfficiencyRating}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Total Alarms" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding TotalAlarms}" FontSize="22" FontWeight="SemiBold"/>
+								<TextBlock Text="Bypass Frequency" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding BypassFreqVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Alarm Storms" Style="{StaticResource SmallLabel}"/>
-								<TextBlock Text="{Binding AlarmStorms}" FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B"/>
+								<TextBlock Text="Bypass Voltage" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding BypassVoltageVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}">
 							<StackPanel>
-								<TextBlock Text="Vdc Std" Style="{StaticResource SmallLabel}"/>
-								<TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#F59E0B">
-                                    <Run Text="{Binding VdcStd, StringFormat=F2}"/><Run Text="V"/>
-								</TextBlock>
+								<TextBlock Text="DC Link" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding DcLinkVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+							</StackPanel>
+						</Border>
+						<Border Style="{StaticResource KpiBox}">
+							<StackPanel>
+								<TextBlock Text="Battery Backup" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding BatteryBackupStatus}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
+							</StackPanel>
+						</Border>
+						<Border Style="{StaticResource KpiBox}">
+							<StackPanel>
+								<TextBlock Text="Output Voltage" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding OutputVoltageVariation}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap"/>
 							</StackPanel>
 						</Border>
 						<Border Style="{StaticResource KpiBox}" Margin="0">
 							<StackPanel>
-								<TextBlock Text="Freq Err" Style="{StaticResource SmallLabel}"/>
-								<TextBlock FontSize="22" FontWeight="SemiBold" Foreground="#DC2626">
-                                    <Run Text="{Binding FreqError, StringFormat=F2}"/><Run Text="Hz"/>
-								</TextBlock>
+								<TextBlock Text="Stress Level" Style="{StaticResource SmallLabel}"/>
+								<TextBlock Text="{Binding StressLevel}" FontSize="15" FontWeight="Bold" Foreground="#DC2626" TextWrapping="Wrap"/>
 							</StackPanel>
 						</Border>
 					</UniformGrid>
 
 					<!-- ── ALERT BANNER ── -->
 					<Border Background="White" BorderBrush="#D7DCE3" BorderThickness="1"
-                            CornerRadius="8" Margin="0,0,0,10">
-						<Grid MinHeight="52">
-							<Grid.ColumnDefinitions>
-								<ColumnDefinition Width="6"/>
-								<ColumnDefinition Width="*"/>
-							</Grid.ColumnDefinitions>
-							<Border Grid.Column="0" Background="#DC2626" CornerRadius="7,0,0,7"/>
-							<StackPanel Grid.Column="1" Margin="14,10" VerticalAlignment="Center">
-								<TextBlock FontSize="13" FontWeight="SemiBold">
-                                    <Run Text="⚠  "/><Run Text="{Binding Urgency}"/><Run Text=" Attention"/>
-								</TextBlock>
-								<TextBlock Text="{Binding AlertMessage}" FontSize="11"
-                                           Foreground="#5A6474" TextWrapping="Wrap"/>
-							</StackPanel>
-						</Grid>
+                            CornerRadius="8" Margin="0,0,0,10" MinHeight="44">
+						<TextBlock Text="{Binding AlertMessage}" FontSize="11"
+                                   Foreground="#374151" TextWrapping="Wrap"
+                                   Margin="14,10" VerticalAlignment="Center"/>
 					</Border>
 
 					<!-- ── HEALTH + RISK ── -->
@@ -250,20 +245,25 @@
 						<Border Style="{StaticResource Card}" Margin="0,0,8,0">
 							<StackPanel>
 								<TextBlock Style="{StaticResource SectionTitle}" Text="Root Cause Analysis"/>
-								<TextBlock Text="{Binding RootCause}" FontSize="13" FontWeight="SemiBold" Margin="0,0,0,4"/>
-								<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,0,0,8">
-                                    <Run Text="Confidence: "/><Run Text="{Binding RootCauseConfidence}" FontWeight="SemiBold"/>
-								</TextBlock>
-								<TextBlock Text="Detected Patterns:" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
-								<ItemsControl ItemsSource="{Binding Patterns}">
-									<ItemsControl.ItemTemplate>
-										<DataTemplate>
-											<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,1">
-                                                <Run Text="→  "/><Run Text="{Binding Mode=OneWay}"/>
-											</TextBlock>
-										</DataTemplate>
-									</ItemsControl.ItemTemplate>
-								</ItemsControl>
+								<ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="200">
+									<StackPanel>
+										<TextBlock Text="{Binding RootCause}" FontSize="12" FontWeight="SemiBold"
+                                                   TextWrapping="Wrap" Margin="0,0,0,4"/>
+										<TextBlock FontSize="11" Foreground="#5A6474" Margin="0,0,0,8">
+                                            <Run Text="Confidence: "/><Run Text="{Binding RootCauseConfidence}" FontWeight="SemiBold"/>
+										</TextBlock>
+										<TextBlock Text="Detected Patterns:" FontSize="11" FontWeight="SemiBold" Margin="0,0,0,4"/>
+										<ItemsControl ItemsSource="{Binding Patterns}">
+											<ItemsControl.ItemTemplate>
+												<DataTemplate>
+													<TextBlock FontSize="11" Foreground="#374151" TextWrapping="Wrap" Margin="0,2">
+                                                        <Run Text="→  "/><Run Text="{Binding Mode=OneWay}"/>
+													</TextBlock>
+												</DataTemplate>
+											</ItemsControl.ItemTemplate>
+										</ItemsControl>
+									</StackPanel>
+								</ScrollViewer>
 							</StackPanel>
 						</Border>
 
@@ -328,63 +328,6 @@
 							</StackPanel>
 						</Border>
 					</Grid>
-
-					<!-- ── SIGNAL ANALYSIS ── -->
-					<Border Style="{StaticResource Card}">
-						<StackPanel>
-							<TextBlock Style="{StaticResource SectionTitle}" Text="Signal Analysis"/>
-							<!-- Row 1: Input / Efficiency / Bypass Freq / Bypass Voltage -->
-							<Grid Margin="0,0,0,10">
-								<Grid.ColumnDefinitions>
-									<ColumnDefinition Width="*"/>
-									<ColumnDefinition Width="*"/>
-									<ColumnDefinition Width="*"/>
-									<ColumnDefinition Width="*"/>
-								</Grid.ColumnDefinitions>
-								<StackPanel>
-									<TextBlock Text="Input Voltage" Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding InputVoltageVariation}" FontSize="12" FontWeight="SemiBold"/>
-								</StackPanel>
-								<StackPanel Grid.Column="1">
-									<TextBlock Text="Efficiency" Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding EfficiencyRating}" FontSize="12" FontWeight="SemiBold"/>
-								</StackPanel>
-								<StackPanel Grid.Column="2">
-									<TextBlock Text="Bypass Freq" Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding BypassFreqVariation}" FontSize="12" FontWeight="SemiBold"/>
-								</StackPanel>
-								<StackPanel Grid.Column="3">
-									<TextBlock Text="Bypass Voltage" Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding BypassVoltageVariation}" FontSize="12" FontWeight="SemiBold"/>
-								</StackPanel>
-							</Grid>
-							<!-- Row 2: DC Link / Battery Backup / Output Voltage / Stress Level -->
-							<Grid>
-								<Grid.ColumnDefinitions>
-									<ColumnDefinition Width="*"/>
-									<ColumnDefinition Width="*"/>
-									<ColumnDefinition Width="*"/>
-									<ColumnDefinition Width="*"/>
-								</Grid.ColumnDefinitions>
-								<StackPanel>
-									<TextBlock Text="DC Link" Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding DcLinkVariation}" FontSize="12" FontWeight="SemiBold"/>
-								</StackPanel>
-								<StackPanel Grid.Column="1">
-									<TextBlock Text="Battery Backup" Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding BatteryBackupStatus}" FontSize="12" FontWeight="SemiBold"/>
-								</StackPanel>
-								<StackPanel Grid.Column="2">
-									<TextBlock Text="Output Voltage" Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding OutputVoltageVariation}" FontSize="12" FontWeight="SemiBold"/>
-								</StackPanel>
-								<StackPanel Grid.Column="3">
-									<TextBlock Text="Stress Level" Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding StressLevel}" FontSize="13" FontWeight="Bold" Foreground="#DC2626"/>
-								</StackPanel>
-							</Grid>
-						</StackPanel>
-					</Border>
 
 					<!-- ── ALARM LOG ── -->
 					<Border Style="{StaticResource Card}">

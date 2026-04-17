@@ -6,14 +6,15 @@ namespace UpsMaintenanceApp.Services
 {
     /// <summary>
     /// Builds an operational-state timeline from the AlarmLog and stamps each
-    /// TelemetryRow with the correct alarm-driven state flags.
+    /// TelemetryRow with alarm-driven state flags.
     ///
-    /// Each alarm row encodes a state transition:
-    ///   No "X - " prefix  → alarm/status became ACTIVE  (e.g. "Inverter_ON"     = inverter started)
-    ///   "X - " prefix     → alarm/status DEACTIVATED    (e.g. "X - Inverter_ON" = inverter stopped)
+    /// Alarm encoding:
+    ///   No "X - " prefix  → alarm ACTIVE  (e.g. "Inverter_ON" = inverter running)
+    ///   "X - " prefix     → alarm CLEARED  (e.g. "X - Inverter_ON" = inverter stopped)
     ///
-    /// This lets FeatureEngine filter rows by real operational windows instead of
-    /// unreliable voltage/frequency thresholds.
+    /// Fallback: if a UPS-state alarm type (Inverter_ON / Rectifier_ON) never appears
+    /// in the log (system was already running at log start), we fall back to voltage/
+    /// frequency thresholds so FeatureEngine still receives useful data.
     /// </summary>
     public static class AlarmStateTimeline
     {
@@ -30,72 +31,78 @@ namespace UpsMaintenanceApp.Services
         {
             if (rows.Count == 0) return;
 
-            // Alarms are already sorted oldest→newest by CsvParser/ExcelParser.
-            // Initial state: assume input/bypass/battery breakers closed; inverter/rectifier unknown.
+            // Scan alarm list once to see which state-alarm types are present.
+            bool hasInverterAlarm  = false;
+            bool hasRectifierAlarm = false;
+            foreach (var a in alarms)
+            {
+                if (Contains(a.Description, "Inverter_ON"))  hasInverterAlarm  = true;
+                if (Contains(a.Description, "Rectifier_ON")) hasRectifierAlarm = true;
+                if (hasInverterAlarm && hasRectifierAlarm) break;
+            }
+
+            // Initial state: breakers assumed closed; inverter/rectifier default to
+            // the fallback value so rows before the first alarm are handled correctly.
             var state = new State
             {
-                RectifierOn      = false,
-                InverterOn       = false,
+                RectifierOn      = !hasRectifierAlarm,   // true when no explicit alarm → assume on
+                InverterOn       = !hasInverterAlarm,    // true when no explicit alarm → assume on
                 InputPresent     = true,
                 BypassOn         = true,
                 BatteryBreakerOn = true,
             };
 
-            int alarmIdx = 0;
+            int alarmIdx  = 0;
             int alarmCount = alarms.Count;
 
             foreach (var row in rows)
             {
-                // Consume all alarm events that occurred at or before this telemetry row's timestamp.
+                // Consume all alarm events at or before this row's timestamp.
                 while (alarmIdx < alarmCount && alarms[alarmIdx].OccurredAt <= row.Timestamp)
                 {
                     Apply(alarms[alarmIdx], ref state);
                     alarmIdx++;
                 }
 
-                // Stamp the row with the current state.
                 row.IsRectifierOn      = state.RectifierOn;
                 row.IsInverterOn       = state.InverterOn;
                 row.IsInputPresent     = state.InputPresent;
                 row.IsBypassOn         = state.BypassOn;
                 row.IsBatteryBreakerOn = state.BatteryBreakerOn;
             }
+
+            // Secondary fallback: even after alarm processing, if still all false,
+            // use voltage/frequency thresholds (handles partial or non-standard logs).
+            if (!hasInverterAlarm)
+                foreach (var row in rows)
+                    if (!row.IsInverterOn && row.OutputFrequency > 0.0)
+                        row.IsInverterOn = true;
+
+            if (!hasRectifierAlarm)
+                foreach (var row in rows)
+                    if (!row.IsRectifierOn && row.DcBusVoltage > 100.0)
+                        row.IsRectifierOn = true;
         }
 
         private static void Apply(AlarmEvent alarm, ref State s)
         {
-            string d = alarm.Description;
+            string d      = alarm.Description;
             bool   active = alarm.IsActive;
 
-            // Match by substring — alarm text may have trailing context in some files.
             if (Contains(d, "Inverter_ON"))
-            {
-                s.InverterOn = active;
-                return;
-            }
+            { s.InverterOn = active; return; }
+
             if (Contains(d, "Rectifier_ON"))
-            {
-                s.RectifierOn = active;
-                return;
-            }
-            // Input_MCCB_OFF active → MCCB is open → input absent; cleared → MCCB closed → input present
+            { s.RectifierOn = active; return; }
+
             if (Contains(d, "Input_MCCB_OFF") || Contains(d, "Input MCCB OFF"))
-            {
-                s.InputPresent = !active;
-                return;
-            }
-            // Bypass Breaker OFF active → bypass open; cleared → bypass closed
+            { s.InputPresent = !active; return; }
+
             if (Contains(d, "Bypass Breaker OFF") || Contains(d, "Bypass_Breaker_OFF"))
-            {
-                s.BypassOn = !active;
-                return;
-            }
-            // Battery Breaker OFF active → battery disconnected; cleared → battery connected
+            { s.BypassOn = !active; return; }
+
             if (Contains(d, "Battery Breaker OFF") || Contains(d, "Battery_Breaker_OFF"))
-            {
-                s.BatteryBreakerOn = !active;
-                return;
-            }
+            { s.BatteryBreakerOn = !active; return; }
         }
 
         private static bool Contains(string source, string value) =>
