@@ -21,17 +21,16 @@ namespace UpsMaintenanceApp.Services
         private const string SystemPrompt =
             "You are a senior UPS maintenance advisor writing an executive summary for a field engineer. " +
             "You receive: (a) aggregated analysis scores from 4 prior AI agents, " +
-            "(b) a time-correlated log merging real telemetry snapshots and alarm events by timestamp. " +
-            "Use the timeline to ground your summary in specific events with timestamps. " +
+            "(b) a time-correlated log merging real telemetry snapshots and alarm events by timestamp.\n" +
             "Follow all CRITICAL ANALYSIS RULES in the context:\n" +
-            "- Only report issues observed during normal online operation (Vdc > 100 V).\n" +
-            "- Clearly distinguish GENUINE FAULTS ('*** ALARM' entries) from " +
-            "INTENTIONAL ACTIONS ('*** STATUS REMOVED' entries and MCCB events).\n" +
-            "- If the UPS was intentionally off/bypassed for much of the log, state this explicitly.\n" +
+            "- Only report issues during normal online operation (DC bus energised, inverter running).\n" +
+            "- Distinguish GENUINE FAULTS ('*** ALARM') from INTENTIONAL ACTIONS ('*** STATUS REMOVED' and MCCB events).\n" +
+            "- 'Input_MCCB_OFF' causing Rectifier_Fail = maintenance action, NOT a fault — do not report.\n" +
+            "- If UPS was intentionally off/bypassed for much of the log, state this explicitly.\n" +
             "Respond in strict JSON only with: " +
-            "Summary (2-3 sentence plain-English summary referencing key timestamps if available), " +
-            "TopIssues (array of max 4 strings — only genuine faults with timestamps where possible), " +
-            "Actions (array of max 4 specific, prioritised maintenance action strings), " +
+            "Summary (2-3 sentences referencing key timestamps where possible), " +
+            "TopIssues (array max 4 — genuine faults only with timestamps), " +
+            "Actions (array max 4 specific prioritised maintenance actions), " +
             "Confidence (Low / Medium / High).";
 
         public InsightAgent(OpenAIClientService ai) => _ai = ai;
@@ -52,11 +51,13 @@ namespace UpsMaintenanceApp.Services
                 $"{operationalContext}\n" +
                 $"=== FULL ANALYSIS RESULTS ===\n" +
                 $"Urgency: {prediction.Urgency}  |  Stress: {signal.StressLevel}\n" +
-                $"Failure Risks: Battery={prediction.BatteryFail}%, " +
-                $"Inverter={prediction.InverterFail}%, Rectifier={prediction.RectifierFail}%\n" +
-                $"Health Scores: Battery={health.BatteryHealth}, DC Link={health.DcLinkHealth}, " +
-                $"Power Stage={health.PowerStageHealth}, Thermal Stress={health.ThermalStress}\n" +
-                $"DC={signal.DcStability}, Battery={signal.BatteryBehavior}, Freq={signal.FrequencyStability}\n" +
+                $"Failure Risks: Battery={prediction.BatteryFail}%  Inverter={prediction.InverterFail}%  Rectifier={prediction.RectifierFail}%\n" +
+                $"Health Scores: Battery={health.BatteryHealth}  DC Link={health.DcLinkHealth}  " +
+                $"Power Stage={health.PowerStageHealth}  Thermal Stress={health.ThermalStress}\n" +
+                $"Input={signal.InputVoltageVariation}  Efficiency={signal.EfficiencyRating}  " +
+                $"DC Link={signal.DcLinkVariation}  Output={signal.OutputVoltageVariation}\n" +
+                $"Bypass Freq={signal.BypassFreqVariation}  Bypass Volt={signal.BypassVoltageVariation}  " +
+                $"Battery={signal.BatteryBackupStatus}\n" +
                 $"Root Cause: {events.RootCause} (Confidence: {events.Confidence})\n" +
                 $"Patterns: {patterns}\n" +
                 $"Observations: {obs}\n\n" +

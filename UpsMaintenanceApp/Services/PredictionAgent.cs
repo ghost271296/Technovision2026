@@ -22,11 +22,12 @@ namespace UpsMaintenanceApp.Services
             "You are a UPS predictive maintenance expert. " +
             "Predict the probability of component failure within the next maintenance window (0-100, " +
             "where 100 = imminent/certain failure, 0 = no risk detected). " +
-            "Base predictions ONLY on faults observed during normal online operation — " +
-            "follow all CRITICAL ANALYSIS RULES in the context. " +
-            "An intentionally commanded-off inverter ('X - Inverter_ON') must NOT increase InverterFail risk. " +
-            "Consider both active alarms (genuine faults) and cleared alarms (transient events). " +
-            "Respond in strict JSON only with integer fields: " +
+            "Base predictions ONLY on genuine faults during normal online operation — " +
+            "follow all CRITICAL ANALYSIS RULES in the context.\n" +
+            "An intentionally commanded-off inverter ('X - Inverter_ON') must NOT increase InverterFail risk.\n" +
+            "An Input_MCCB_OFF event that triggered Rectifier_Fail must NOT increase RectifierFail risk.\n" +
+            "Consider both active alarms (genuine faults) and cleared alarms (transient events).\n" +
+            "Respond in strict JSON only with: " +
             "InverterFail (0-100), RectifierFail (0-100), BatteryFail (0-100), " +
             "Urgency (Immediate / High / Medium / Low).";
 
@@ -42,12 +43,13 @@ namespace UpsMaintenanceApp.Services
             string patterns = string.Join("; ", events.Patterns);
             string user =
                 $"{operationalContext}\n" +
-                $"=== HEALTH SCORES (0-100, higher=healthier) ===\n" +
-                $"Battery={health.BatteryHealth}, DC Link={health.DcLinkHealth}, " +
-                $"Power Stage={health.PowerStageHealth}, Thermal Stress={health.ThermalStress}\n\n" +
+                $"=== HEALTH SCORES (0-100, higher = healthier) ===\n" +
+                $"Battery={health.BatteryHealth}  DC Link={health.DcLinkHealth}  " +
+                $"Power Stage={health.PowerStageHealth}  Thermal Stress={health.ThermalStress}\n\n" +
                 $"=== SIGNAL ANALYSIS ===\n" +
-                $"Stress={signal.StressLevel}, DC={signal.DcStability}, " +
-                $"Battery={signal.BatteryBehavior}, Freq={signal.FrequencyStability}\n\n" +
+                $"Stress={signal.StressLevel}  DC Link={signal.DcLinkVariation}  " +
+                $"Output={signal.OutputVoltageVariation}  Battery={signal.BatteryBackupStatus}  " +
+                $"Efficiency={signal.EfficiencyRating}\n\n" +
                 $"=== EVENT CORRELATION ===\n" +
                 $"Root Cause: {events.RootCause} (Confidence: {events.Confidence})\n" +
                 $"Fault Patterns: {patterns}\n\n" +

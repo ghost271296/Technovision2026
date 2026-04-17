@@ -43,11 +43,15 @@ namespace UpsMaintenanceApp.ViewModels
         [ObservableProperty] private string _rootCauseConfidence = "—";
         [ObservableProperty] private ObservableCollection<string> _patterns = new();
 
-        // Signal Analysis
-        [ObservableProperty] private string _dcStability        = "—";
-        [ObservableProperty] private string _batteryBehavior    = "—";
-        [ObservableProperty] private string _frequencyStability = "—";
-        [ObservableProperty] private string _stressLevel        = "—";
+        // Signal Analysis — 7 domain-specific assessments
+        [ObservableProperty] private string _inputVoltageVariation  = "—";
+        [ObservableProperty] private string _efficiencyRating       = "—";
+        [ObservableProperty] private string _bypassFreqVariation    = "—";
+        [ObservableProperty] private string _bypassVoltageVariation = "—";
+        [ObservableProperty] private string _dcLinkVariation        = "—";
+        [ObservableProperty] private string _batteryBackupStatus    = "—";
+        [ObservableProperty] private string _outputVoltageVariation = "—";
+        [ObservableProperty] private string _stressLevel            = "—";
 
         // AI Insight
         [ObservableProperty] private string _insightSummary    = "—";

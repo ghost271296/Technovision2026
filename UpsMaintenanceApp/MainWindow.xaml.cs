@@ -159,11 +159,15 @@ namespace UpsMaintenanceApp
             _lastResult = result;
 
             // ── Populate ViewModel ─────────────────────────────────────────────
-            // CoreSignal
-            _vm.DcStability         = result.CoreSignal.DcStability;
-            _vm.BatteryBehavior     = result.CoreSignal.BatteryBehavior;
-            _vm.FrequencyStability  = result.CoreSignal.FrequencyStability;
-            _vm.StressLevel         = result.CoreSignal.StressLevel;
+            // CoreSignal — 7 domain-specific assessments
+            _vm.InputVoltageVariation  = result.CoreSignal.InputVoltageVariation;
+            _vm.EfficiencyRating       = result.CoreSignal.EfficiencyRating;
+            _vm.BypassFreqVariation    = result.CoreSignal.BypassFreqVariation;
+            _vm.BypassVoltageVariation = result.CoreSignal.BypassVoltageVariation;
+            _vm.DcLinkVariation        = result.CoreSignal.DcLinkVariation;
+            _vm.BatteryBackupStatus    = result.CoreSignal.BatteryBackupStatus;
+            _vm.OutputVoltageVariation = result.CoreSignal.OutputVoltageVariation;
+            _vm.StressLevel            = result.CoreSignal.StressLevel;
             // Health
             _vm.BatteryHealth       = result.Health.BatteryHealth;
             _vm.DcLinkHealth        = result.Health.DcLinkHealth;

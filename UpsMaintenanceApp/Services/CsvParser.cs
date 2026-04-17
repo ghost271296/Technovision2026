@@ -121,6 +121,13 @@ namespace UpsMaintenanceApp.Services
                         BypassVoltage   = Dbl(cols, h, "Vbypass"),
                         BypassCurrent   = Dbl(cols, h, "Ibypass"),
                         BypassFrequency = Dbl(cols, h, "Frequency Bypass"),
+                        // 3-phase input (optional — zero if not in file)
+                        InputVoltageR = Dbl(cols, h, "Vr Input"),
+                        InputVoltageY = Dbl(cols, h, "Vy Input"),
+                        InputVoltageB = Dbl(cols, h, "Vb Input"),
+                        InputCurrentR = Dbl(cols, h, "Ir Input") > 0 ? Dbl(cols, h, "Ir Input") : Dbl(cols, h, "Ir"),
+                        InputCurrentY = Dbl(cols, h, "Iy Input") > 0 ? Dbl(cols, h, "Iy Input") : Dbl(cols, h, "Iy"),
+                        InputCurrentB = Dbl(cols, h, "Ib Input") > 0 ? Dbl(cols, h, "Ib Input") : Dbl(cols, h, "Ib"),
                         // Inverter
                         InverterVoltage   = Dbl(cols, h, "Vinv"),
                         InverterCurrent   = Dbl(cols, h, "Iout_UPS"),

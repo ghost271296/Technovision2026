@@ -6,7 +6,7 @@ namespace UpsMaintenanceApp.Models
     {
         public DateTime Timestamp { get; set; } = DateTime.MinValue;
 
-        // ── DC bus (VdcLink / IdcLink) ────────────────────────────────────────
+        // ── DC bus ────────────────────────────────────────────────────────────
         public double DcBusVoltage  { get; set; } = 0.0;   // VdcLink
         public double DcLinkCurrent { get; set; } = 0.0;   // IdcLink
 
@@ -16,12 +16,19 @@ namespace UpsMaintenanceApp.Models
         public double BatteryVoltagePos { get; set; } = 0.0;   // VBatt Pos
         public double BatteryVoltageNeg { get; set; } = 0.0;   // VBatt Neg
 
-        // ── Bypass / mains ────────────────────────────────────────────────────
+        // ── Bypass / mains (single-phase proxy for input) ─────────────────────
         public double BypassVoltage   { get; set; } = 0.0;   // Vbypass
         public double BypassCurrent   { get; set; } = 0.0;   // Ibypass
         public double BypassFrequency { get; set; } = 0.0;   // Frequency Bypass
-        // InputFrequency kept as alias for BypassFrequency (used in older code paths)
         public double InputFrequency  => BypassFrequency;
+
+        // ── 3-phase input (populated when file contains these columns) ─────────
+        public double InputVoltageR { get; set; } = 0.0;   // Vr Input
+        public double InputVoltageY { get; set; } = 0.0;   // Vy Input
+        public double InputVoltageB { get; set; } = 0.0;   // Vb Input
+        public double InputCurrentR { get; set; } = 0.0;   // Ir / Ir Input
+        public double InputCurrentY { get; set; } = 0.0;   // Iy / Iy Input
+        public double InputCurrentB { get; set; } = 0.0;   // Ib / Ib Input
 
         // ── Inverter output ───────────────────────────────────────────────────
         public double InverterVoltage   { get; set; } = 0.0;   // Vinv
@@ -36,13 +43,14 @@ namespace UpsMaintenanceApp.Models
         public double OutputPowerKva  { get; set; } = 0.0;   // KVA_output
         public double PowerFactor     { get; set; } = 0.0;   // PF_out
 
-        // ── Convenience: is the UPS actively running? ─────────────────────────
-        /// <summary>True when the DC bus is energised (> 100 V) — best proxy for UPS online.</summary>
-        public bool IsOnline => DcBusVoltage > 100.0;
-        /// <summary>True when the inverter is actively generating output.</summary>
+        // ── Convenience properties ────────────────────────────────────────────
+        public bool IsOnline         => DcBusVoltage > 100.0;
         public bool IsInverterActive => OutputFrequency > 0.0;
-        /// <summary>True when bypass/mains supply is present.</summary>
-        public bool IsMainsPresent => BypassVoltage > 10.0;
+        public bool IsMainsPresent   => BypassVoltage > 10.0;
+        // True when DC bus is live but mains/bypass is absent (battery supplying load)
+        public bool IsBatteryOnBackup => IsOnline && !IsMainsPresent && BatteryVoltage > 100.0;
+        // True only when all three phase voltages are populated
+        public bool Has3PhaseInput   => InputVoltageR > 1.0 && InputVoltageY > 1.0 && InputVoltageB > 1.0;
     }
 
     public class AlarmEvent

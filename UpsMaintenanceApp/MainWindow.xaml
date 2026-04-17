@@ -333,6 +333,32 @@
 					<Border Style="{StaticResource Card}">
 						<StackPanel>
 							<TextBlock Style="{StaticResource SectionTitle}" Text="Signal Analysis"/>
+							<!-- Row 1: Input / Efficiency / Bypass Freq / Bypass Voltage -->
+							<Grid Margin="0,0,0,10">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="*"/>
+									<ColumnDefinition Width="*"/>
+								</Grid.ColumnDefinitions>
+								<StackPanel>
+									<TextBlock Text="Input Voltage" Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding InputVoltageVariation}" FontSize="12" FontWeight="SemiBold"/>
+								</StackPanel>
+								<StackPanel Grid.Column="1">
+									<TextBlock Text="Efficiency" Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding EfficiencyRating}" FontSize="12" FontWeight="SemiBold"/>
+								</StackPanel>
+								<StackPanel Grid.Column="2">
+									<TextBlock Text="Bypass Freq" Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding BypassFreqVariation}" FontSize="12" FontWeight="SemiBold"/>
+								</StackPanel>
+								<StackPanel Grid.Column="3">
+									<TextBlock Text="Bypass Voltage" Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding BypassVoltageVariation}" FontSize="12" FontWeight="SemiBold"/>
+								</StackPanel>
+							</Grid>
+							<!-- Row 2: DC Link / Battery Backup / Output Voltage / Stress Level -->
 							<Grid>
 								<Grid.ColumnDefinitions>
 									<ColumnDefinition Width="*"/>
@@ -341,20 +367,20 @@
 									<ColumnDefinition Width="*"/>
 								</Grid.ColumnDefinitions>
 								<StackPanel>
-									<TextBlock Text="DC Stability"  Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding DcStability}" FontSize="13" FontWeight="SemiBold"/>
+									<TextBlock Text="DC Link" Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding DcLinkVariation}" FontSize="12" FontWeight="SemiBold"/>
 								</StackPanel>
 								<StackPanel Grid.Column="1">
-									<TextBlock Text="Battery"       Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding BatteryBehavior}" FontSize="13" FontWeight="SemiBold"/>
+									<TextBlock Text="Battery Backup" Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding BatteryBackupStatus}" FontSize="12" FontWeight="SemiBold"/>
 								</StackPanel>
 								<StackPanel Grid.Column="2">
-									<TextBlock Text="Frequency"     Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding FrequencyStability}" FontSize="13" FontWeight="SemiBold"/>
+									<TextBlock Text="Output Voltage" Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding OutputVoltageVariation}" FontSize="12" FontWeight="SemiBold"/>
 								</StackPanel>
 								<StackPanel Grid.Column="3">
-									<TextBlock Text="Stress Level"  Style="{StaticResource SmallLabel}"/>
-									<TextBlock Text="{Binding StressLevel}" FontSize="13" FontWeight="SemiBold"/>
+									<TextBlock Text="Stress Level" Style="{StaticResource SmallLabel}"/>
+									<TextBlock Text="{Binding StressLevel}" FontSize="13" FontWeight="Bold" Foreground="#DC2626"/>
 								</StackPanel>
 							</Grid>
 						</StackPanel>
