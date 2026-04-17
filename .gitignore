@@ -3,7 +3,6 @@
 *.json
 *.exe
 *.pdb
-*.cs
 *.baml
 *.Up2Date
 *.cache
