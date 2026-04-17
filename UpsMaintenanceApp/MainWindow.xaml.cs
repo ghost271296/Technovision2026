@@ -23,6 +23,7 @@ namespace UpsMaintenanceApp
     {
         private readonly DashboardViewModel _vm = new();
         private FinalResult? _lastResult;
+        private Dictionary<string, double> _lastFeatures = new();
 
         public MainWindow()
         {
@@ -131,6 +132,7 @@ namespace UpsMaintenanceApp
             // ── Features ───────────────────────────────────────────────────────
             _vm.PipelineStatus = "Computing features…";
             var features = FeatureEngine.ComputeAll(telemetry, alarms);
+            _lastFeatures = features;
 
             features.TryGetValue("VdcMean",          out double vdcMean);
             features.TryGetValue("VdcStd",           out double vdcStd);
@@ -367,7 +369,7 @@ namespace UpsMaintenanceApp
             }
 
             if (tag == "Report" && _lastResult is not null)
-                PageReport.LoadReport(_lastResult);
+                PageReport.LoadReport(_lastResult, _lastFeatures);
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────
