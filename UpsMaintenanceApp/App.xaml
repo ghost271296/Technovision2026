@@ -31,10 +31,12 @@
 
         <!-- KPI Box -->
         <Style x:Key="KpiBox" TargetType="Border">
-            <Setter Property="Background"   Value="#F2F4F8"/>
-            <Setter Property="CornerRadius" Value="6"/>
-            <Setter Property="Padding"      Value="10"/>
-            <Setter Property="Margin"       Value="0,0,8,0"/>
+            <Setter Property="Background"      Value="White"/>
+            <Setter Property="BorderBrush"     Value="#D7DCE3"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="CornerRadius"    Value="8"/>
+            <Setter Property="Padding"         Value="12,10"/>
+            <Setter Property="Margin"          Value="0,0,8,8"/>
         </Style>
 
         <!-- Section Title -->

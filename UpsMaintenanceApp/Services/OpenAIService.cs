@@ -20,7 +20,7 @@ namespace UpsMaintenanceApp.Services
             _client = new OpenAIClient(apiKey).GetChatClient(model);
         }
 
-        public async Task<string> CallAsync(string systemPrompt, string userPrompt)
+        public async Task<string> CallAsync(string systemPrompt, string userPrompt, int maxTokens = 2000)
         {
             int        attempt = 0;
             Exception? lastEx  = null;
@@ -32,8 +32,8 @@ namespace UpsMaintenanceApp.Services
                 {
                     var options = new ChatCompletionOptions
                     {
-                        Temperature         = 0.1f,   // lower = more deterministic / factual
-                        MaxOutputTokenCount = MaxTokens,
+                        Temperature         = 0.1f,
+                        MaxOutputTokenCount = maxTokens,
                         ResponseFormat      = ChatResponseFormat.CreateJsonObjectFormat()
                     };
 
