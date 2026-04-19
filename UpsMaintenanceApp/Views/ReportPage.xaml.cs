@@ -56,9 +56,8 @@ namespace UpsMaintenanceApp.Views
             PatternsList.ItemsSource = r.EventCorrelation.Patterns;
 
             // ── Section 5: Fishbone Diagram ───────────────────────────────────
-            // Defer until after layout so Canvas.ActualWidth is available
             Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Render,
-                new Action(() => DrawFishbone(r)));
+                new Action(() => DrawFishbone(r, features)));
 
             // ── Section 6: Corrective Actions ─────────────────────────────────
             var (immediate, scheduled, monitor) = CategoriseActions(r.Insight.Actions);
@@ -198,7 +197,7 @@ namespace UpsMaintenanceApp.Views
 
         // ── Section 5: Fishbone Canvas ────────────────────────────────────────
 
-        private void DrawFishbone(FinalResult r)
+        private void DrawFishbone(FinalResult r, Dictionary<string, double> features)
         {
             FishboneCanvas.Children.Clear();
 
@@ -230,20 +229,14 @@ namespace UpsMaintenanceApp.Views
             FishboneCanvas.Children.Add(rect);
 
             FbText("EFFECT", X1 + 73, SpineY - 27, 9, "#2563EB", bold: true, TextAlignment.Center);
-            string effect = (r.EventCorrelation.RootCause ?? "Unknown Root Cause");
+            string effect = r.EventCorrelation.RootCause ?? "Unknown";
             if (effect.Length > 22) effect = effect.Substring(0, 20) + "…";
             FbText(effect, X1 + 8, SpineY - 10, 10, "#1E293B", bold: false, TextAlignment.Left, 126);
 
-            // 6 ribs — 3 upper, 3 lower
+            // 3 upper ribs + 3 lower ribs with per-category analysis
             string[] upper = { "Input Power", "DC Link", "Inverter" };
             string[] lower = { "Bypass",      "Battery", "Thermal"  };
             double[] ribX  = { 130, 290, 450 };
-
-            var patterns = r.EventCorrelation.Patterns
-                .Where(p => !string.IsNullOrWhiteSpace(p))
-                .Concat(Enumerable.Repeat(string.Empty, 6))
-                .Take(6)
-                .ToList();
 
             for (int i = 0; i < 3; i++)
             {
@@ -253,30 +246,103 @@ namespace UpsMaintenanceApp.Views
 
                 // Upper rib
                 FbLine(sx, SpineY, utx, uty, "#3B82F6", 1.5);
-                FbText(upper[i], utx - 4, uty - 19, 10, "#1E40AF", bold: true, TextAlignment.Right);
-
-                string upPat = patterns[i * 2];
-                if (!string.IsNullOrWhiteSpace(upPat))
-                {
-                    double mx = (sx + utx) / 2, my = (SpineY + uty) / 2;
-                    FbLine(mx, my, mx, my - 24, "#93C5FD", 1);
-                    if (upPat.Length > 20) upPat = upPat.Substring(0, 18) + "…";
-                    FbText(upPat, mx - 52, my - 40, 9, "#64748B", bold: false, TextAlignment.Center, 104);
-                }
+                FbText(upper[i], utx + 2, uty - 18, 10, "#1E40AF", bold: true, TextAlignment.Left);
+                DrawRibAnalysis(sx, SpineY, utx, uty,
+                    GetRibAnalysis(upper[i], features, r.Health), isUpper: true);
 
                 // Lower rib
                 FbLine(sx, SpineY, ltx, lty, "#3B82F6", 1.5);
-                FbText(lower[i], ltx - 4, lty + 5, 10, "#1E40AF", bold: true, TextAlignment.Right);
-
-                string loPat = patterns[i * 2 + 1];
-                if (!string.IsNullOrWhiteSpace(loPat))
-                {
-                    double mx = (sx + ltx) / 2, my = (SpineY + lty) / 2;
-                    FbLine(mx, my, mx, my + 24, "#93C5FD", 1);
-                    if (loPat.Length > 20) loPat = loPat.Substring(0, 18) + "…";
-                    FbText(loPat, mx - 52, my + 28, 9, "#64748B", bold: false, TextAlignment.Center, 104);
-                }
+                FbText(lower[i], ltx + 2, lty + 5, 10, "#1E40AF", bold: true, TextAlignment.Left);
+                DrawRibAnalysis(sx, SpineY, ltx, lty,
+                    GetRibAnalysis(lower[i], features, r.Health), isUpper: false);
             }
+        }
+
+        // Draws a short perpendicular branch at 45% along the rib, with a 2-line analysis label.
+        private void DrawRibAnalysis(double baseX, double baseY, double tipX, double tipY,
+                                     string analysis, bool isUpper)
+        {
+            if (string.IsNullOrWhiteSpace(analysis)) return;
+
+            double t  = 0.45;
+            double mx = baseX + t * (tipX - baseX);
+            double my = baseY + t * (tipY - baseY);
+
+            double endY  = isUpper ? my - 20 : my + 20;
+            FbLine(mx, my, mx, endY, "#60A5FA", 1);
+
+            double textY = isUpper ? endY - 26 : endY + 2;
+            FbText(analysis, mx - 52, textY, 9, "#374151", bold: false, TextAlignment.Center, 104);
+        }
+
+        // Returns a 2-line analysis string computed from features for each rib category.
+        private static string GetRibAnalysis(string rib, Dictionary<string, double> features,
+                                             HealthResult health)
+        {
+            double F(string k) { features.TryGetValue(k, out double v); return v; }
+
+            return rib switch
+            {
+                "Input Power" => RibInputPower(F("VinAvg"),    F("VinStd"),
+                                               F("VinUnbalancePu"), F("MainsPresentPct")),
+                "DC Link"     => RibDcLink(    F("VdcMean"),   F("VdcStd"),    health.DcLinkHealth),
+                "Inverter"    => RibInverter(  F("FoutStd"),   F("VoutStd"),
+                                               F("EfficiencyMean"), health.PowerStageHealth),
+                "Bypass"      => RibBypass(    F("BypassVoltageStd"), F("BypassFreqStd")),
+                "Battery"     => RibBattery(   F("RbattProxy"), F("BatteryBackupMin"), health.BatteryHealth),
+                "Thermal"     => RibThermal(   health.ThermalStress, F("AlarmRatePerHour")),
+                _             => string.Empty,
+            };
+        }
+
+        private static string RibInputPower(double vinAvg, double vinStd, double unbal, double mainsPct)
+        {
+            string l1 = vinAvg > 1 ? $"Vin avg: {vinAvg:F0} V" : "No input data";
+            string l2 = vinStd > 2    ? $"σ: ±{vinStd:F1}V (high variation)"
+                      : vinStd > 0.01 ? $"σ: ±{vinStd:F2}V{(unbal > 0.02 ? $"  unbal:{unbal*100:F1}%" : "")}"
+                      : mainsPct < 95 ? $"Mains: {mainsPct:F0}% of log"
+                      :                 "Input voltage stable";
+            return $"{l1}\n{l2}";
+        }
+
+        private static string RibDcLink(double vdcMean, double vdcStd, int health)
+        {
+            string l1 = vdcMean > 1 ? $"Vdc mean: {vdcMean:F0} V" : "DC bus inactive";
+            string l2 = vdcStd > 0.5 ? $"σ: ±{vdcStd:F2}V  Health: {health}/100"
+                                      : $"DC stable  Health: {health}/100";
+            return $"{l1}\n{l2}";
+        }
+
+        private static string RibInverter(double foutStd, double voutStd, double eff, int health)
+        {
+            string l1 = eff > 0.1 ? $"Efficiency: {eff:F1}%  H:{health}/100"
+                                   : $"Inv health: {health}/100";
+            string l2 = voutStd > 0.1   ? $"Vout σ: ±{voutStd:F2}V"
+                      : foutStd > 0.001 ? $"Freq σ: {foutStd:F4} Hz"
+                      :                   "Output stable";
+            return $"{l1}\n{l2}";
+        }
+
+        private static string RibBypass(double bypVStd, double bypFStd)
+        {
+            string l1 = bypVStd > 0.01   ? $"Vbyp σ: ±{bypVStd:F2}V" : "Bypass V stable";
+            string l2 = bypFStd > 0.0001 ? $"Freq σ: {bypFStd:F4} Hz" : "Bypass freq stable";
+            return $"{l1}\n{l2}";
+        }
+
+        private static string RibBattery(double rbatt, double battMin, int health)
+        {
+            string l1 = rbatt > 0.001 ? $"Rbatt: {rbatt:F3} Ω  H:{health}/100"
+                                       : $"Battery health: {health}/100";
+            string l2 = battMin > 0.1 ? $"Backup used: {battMin:F0} min" : "Backup: not used";
+            return $"{l1}\n{l2}";
+        }
+
+        private static string RibThermal(int thermalStress, double alarmRate)
+        {
+            string l1 = $"Thermal stress: {thermalStress}/100";
+            string l2 = alarmRate > 0.01 ? $"Alarm rate: {alarmRate:F2} /hr" : "No alarms logged";
+            return $"{l1}\n{l2}";
         }
 
         private void FbLine(double x1, double y1, double x2, double y2,
