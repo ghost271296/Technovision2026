@@ -297,51 +297,96 @@ namespace UpsMaintenanceApp.Views
 
         private static string RibInputPower(double vinAvg, double vinStd, double unbal, double mainsPct)
         {
-            string l1 = vinAvg > 1 ? $"Vin avg: {vinAvg:F0} V" : "No input data";
-            string l2 = vinStd > 2    ? $"σ: ±{vinStd:F1}V (high variation)"
-                      : vinStd > 0.01 ? $"σ: ±{vinStd:F2}V{(unbal > 0.02 ? $"  unbal:{unbal*100:F1}%" : "")}"
-                      : mainsPct < 95 ? $"Mains: {mainsPct:F0}% of log"
-                      :                 "Input voltage stable";
+            string l1 = vinStd > 5    ? "High input voltage variation"
+                      : vinStd > 2    ? "Moderate input fluctuation"
+                      : mainsPct < 90 ? "Frequent mains interruptions"
+                      : vinAvg  > 1   ? "Input supply stable"
+                      :                 "No input data available";
+
+            string l2 = unbal > 0.03  ? "Significant phase unbalance"
+                      : unbal > 0.01  ? "Minor phase unbalance detected"
+                      : mainsPct < 95 ? $"Mains absent {100-mainsPct:F0}% of log"
+                      : vinStd  > 0.01 ? $"Within tolerance (σ {vinStd:F2}V)"
+                      :                  "All phases balanced";
+
             return $"{l1}\n{l2}";
         }
 
         private static string RibDcLink(double vdcMean, double vdcStd, int health)
         {
-            string l1 = vdcMean > 1 ? $"Vdc mean: {vdcMean:F0} V" : "DC bus inactive";
-            string l2 = vdcStd > 0.5 ? $"σ: ±{vdcStd:F2}V  Health: {health}/100"
-                                      : $"DC stable  Health: {health}/100";
+            string l1 = health < 60  ? "DC link health critical"
+                      : health < 80  ? "DC link health degraded"
+                      : vdcStd > 5   ? "DC bus ripple — check caps"
+                      : vdcStd > 2   ? "DC link instability detected"
+                      : vdcMean > 1  ? "DC bus operating normally"
+                      :                "DC bus inactive";
+
+            string l2 = vdcStd > 2   ? "Possible capacitor degradation"
+                      : health < 80  ? $"Health score: {health}/100"
+                      : vdcMean > 1  ? $"Vdc stable at {vdcMean:F0}V"
+                      :                "No DC bus data";
+
             return $"{l1}\n{l2}";
         }
 
         private static string RibInverter(double foutStd, double voutStd, double eff, int health)
         {
-            string l1 = eff > 0.1 ? $"Efficiency: {eff:F1}%  H:{health}/100"
-                                   : $"Inv health: {health}/100";
-            string l2 = voutStd > 0.1   ? $"Vout σ: ±{voutStd:F2}V"
-                      : foutStd > 0.001 ? $"Freq σ: {foutStd:F4} Hz"
-                      :                   "Output stable";
+            string l1 = health < 60           ? "Power stage health critical"
+                      : eff > 0.1 && eff < 85 ? "Low conversion efficiency"
+                      : voutStd > 2           ? "Output voltage unstable"
+                      : foutStd > 0.05        ? "Output frequency deviation"
+                      :                         "Inverter operating normally";
+
+            string l2 = eff > 0.1     ? $"Efficiency: {eff:F1}%  H:{health}/100"
+                      : health < 80   ? $"Health score: {health}/100"
+                      :                 "Output waveform stable";
+
             return $"{l1}\n{l2}";
         }
 
         private static string RibBypass(double bypVStd, double bypFStd)
         {
-            string l1 = bypVStd > 0.01   ? $"Vbyp σ: ±{bypVStd:F2}V" : "Bypass V stable";
-            string l2 = bypFStd > 0.0001 ? $"Freq σ: {bypFStd:F4} Hz" : "Bypass freq stable";
+            string l1 = bypVStd > 5    ? "Bypass supply highly unstable"
+                      : bypVStd > 2    ? "Bypass voltage fluctuating"
+                      : bypFStd > 0.5  ? "Bypass frequency unstable"
+                      : bypFStd > 0.05 ? "Bypass freq minor deviation"
+                      :                  "Bypass supply stable";
+
+            string l2 = bypVStd > 0.5  ? $"Vbyp σ = ±{bypVStd:F2}V — investigate"
+                      : bypFStd > 0.01 ? $"Freq σ = {bypFStd:F4}Hz"
+                      :                  "No bypass anomalies";
+
             return $"{l1}\n{l2}";
         }
 
         private static string RibBattery(double rbatt, double battMin, int health)
         {
-            string l1 = rbatt > 0.001 ? $"Rbatt: {rbatt:F3} Ω  H:{health}/100"
-                                       : $"Battery health: {health}/100";
-            string l2 = battMin > 0.1 ? $"Backup used: {battMin:F0} min" : "Backup: not used";
+            string l1 = health < 60   ? "Battery health critical"
+                      : health < 80   ? "Battery health degraded"
+                      : rbatt > 0.05  ? "High internal resistance"
+                      : battMin > 0.1 ? "Battery backup activated"
+                      :                 "Battery in good condition";
+
+            string l2 = rbatt > 0.05  ? "Battery ageing — test/replace"
+                      : rbatt > 0.01  ? $"Rbatt {rbatt:F3}Ω — monitor trend"
+                      : battMin > 0.1 ? $"Backup duration: {battMin:F0} min"
+                      :                 $"Health {health}/100 — no events";
+
             return $"{l1}\n{l2}";
         }
 
         private static string RibThermal(int thermalStress, double alarmRate)
         {
-            string l1 = $"Thermal stress: {thermalStress}/100";
-            string l2 = alarmRate > 0.01 ? $"Alarm rate: {alarmRate:F2} /hr" : "No alarms logged";
+            string l1 = thermalStress > 70 ? "High thermal stress — urgent"
+                      : thermalStress > 40 ? "Moderate thermal load"
+                      : alarmRate > 5      ? "High alarm frequency"
+                      : alarmRate > 1      ? "Elevated alarm rate"
+                      :                      "Thermal conditions normal";
+
+            string l2 = thermalStress > 40 ? "Check cooling / ventilation"
+                      : alarmRate > 1      ? $"Rate: {alarmRate:F2} alarms/hr"
+                      :                      "No thermal concerns";
+
             return $"{l1}\n{l2}";
         }
 
